@@ -99,6 +99,8 @@ def main():
             rezepte = []
         if request.method == "POST":
             if request.form["pass"]=="ichessegernekuchen" or "pass" in request.cookies:
+                if request.form["title"]=="":
+                    return page("Please enter at least a title")
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
                 print(request.form["title"])
                 if request.form.get("id")!=None:
