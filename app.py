@@ -6,7 +6,44 @@ import jinja2
 import uuid
 
 app = Flask(__name__)
-
+header = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>Bäcker One</title>
+                </head>
+                <body>
+                <style>
+                *{
+                    font-size: 20px;
+                }
+                body{
+                    background: gray;
+                }
+                textarea{
+                    background: whitesmoke;
+                    border: 0px;
+                }
+                main{
+                        padding: 40px;
+                }
+                details{
+                    padding:40px 0 40px 0;
+                    background: blue;
+                    width: 500px;
+                    border-radius: 15px;
+                }
+                .indent {
+                    padding: 20px;
+                }
+                </style>
+                <main>
+                """
+footer = """
+                </main>
+                </body>
+                </html>
+                """
 main_page = """
                 <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                 REZEPTE: 
@@ -17,13 +54,14 @@ main_page = """
                 </ul>
                 <details>
                 <summary>Rezept hinzufügen</summary>
-                <form method="post">
-                Titel:<br> <input name="title" /><br>
+                <form method="post" class="indent">
+                Titel :<br> <input name="title" /><br>
+                Tags (Kommaseparierte Liste):<br> <input name="tags" /><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33"></textarea><br>
                 Rezept:<br> <textarea name="prep" rows="5" cols="33"></textarea><br>
                 <br>
                 Passphrase:<br> <input name="pass" /><br>
-                <button type="submit">SEND</button>
+                <button type="submit">Abschicken</button>
                 </form>
                 </details>
                 """
@@ -48,15 +86,15 @@ def main():
             rezepte = []
         if request.method == "POST":
             if request.form["pass"]=="ichessegernekuchen":
-                rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000], hash=uuid.uuid4().__str__())
+                rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,hash=uuid.uuid4().__str__())
                 rezepte.append(rezept)
                 with open("data.txt","w") as data:
                     data.write(json.dumps(rezepte,indent=2))
                 return redirect("/r/"+rezept["hash"])
             else:
-                return "FALSCHE PASSPHRASE"
+                return page("FALSCHE PASSPHRASE, Rezept nicht gefunden")
         environment = jinja2.Environment()
-        template = environment.from_string(main_page)
+        template = environment.from_string(page(main_page))
         return template.render(recepies=rezepte)
            
 
@@ -73,7 +111,11 @@ def rezepte(id):
         if rezept!=[]:
             rezept = rezept[0]
             environment = jinja2.Environment()
-            template = environment.from_string(recepie_page)
+            template = environment.from_string(page(recepie_page))
             return template.render(r=rezept)
         else:
-            return "Rezept nicht gefunden :("
+            return page("Rezept nicht gefunden :(")
+
+
+def page(name):
+    return header + name + footer
