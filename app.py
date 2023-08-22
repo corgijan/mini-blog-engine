@@ -77,7 +77,7 @@ main_page = """
                      <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
                     <ul id="myUL">
                     {% for r in recepies%}
-                        <li><h2><a href="/r/{{r.id}}">{{ r.title }}</a></h2></li>
+                        <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}</a></h2></li>
                     {% endfor %}
                     </ul>
 
@@ -85,17 +85,17 @@ main_page = """
 
 edit_page= """
                     <form method="post" action="/">
-                    Titel :<br> <input name="title" value="{{r.title}}"></input><br>
-                    Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags}}"/><br>
-                Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients}}</textarea><br>
-                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep}}</textarea><br>
+                    Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
+                    Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
+                Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
+                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
                 <br>
-                {% if not passphrase %}
-                Passphrase:<br> <input name="pass"/><br>
+                {% if passphrase %}
+                    <input name="pass" value="ichessegernekuchen" type="hidden"/><br>
                 {% else %}
-                <input name="pass" value="ichessegernekuchen" type="hidden"/><br>
+                    Passphrase:<br> <input name="pass"/><br>
                 {%endif%}
-                <input type="hidden" name="id" value="{{r.id}}"/>
+                <input type="hidden" name="id" value="{{r.id|e}}"/>
                 <button type="submit">Abschicken</button>
                 </form>
 
@@ -103,11 +103,11 @@ edit_page= """
 
 recepie_page = """
                     <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
-                    <h1>{{r.title}}</h1>
+                    <h1>{{r.title|e}}</h1>
                     <h3 style="text-decoration: underline;"> Zutaten: </h3>
-                    <h4><pre>{{r.ingredients}}</pre></h4>
+                    <h4><pre>{{r.ingredients|e}}</pre></h4>
                     <h3 style="text-decoration: underline;"> Zubereitung: </h3>
-                    <h4><pre>{{r.prep}}</pre></h4>
+                    <h4><pre>{{r.prep|e}}</pre></h4>
                     <a href="/e/{{r.id}}">Editieren</a>
                 """
 
@@ -125,14 +125,18 @@ def main():
                 if request.form["title"]=="":
                     return page("Please enter at least a title")
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
-                print(request.form["title"])
                 if request.form.get("id")!=None:
                     rezepte = list(filter(lambda x: x["id"] != request.form["id"],rezepte))
                 rezepte.append(rezept)
                 print(rezept)
                 with open("data.txt","w") as data:
                     data.write(json.dumps(rezepte,indent=2))
-                return redirect("/r/"+rezept["id"])
+                environment = jinja2.Environment()
+                template = environment.from_string(page(edit_page))
+                passphrase= request.cookies.get("pass")
+                res = make_response(redirect("/r/"+rezept["id"]))
+                res.set_cookie( "pass", "ok")
+                return res
             else:
                 return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert")
         environment = jinja2.Environment()
@@ -159,7 +163,6 @@ def rezepte_edit(id):
         template = environment.from_string(page(edit_page))
         passphrase= request.cookies.get("pass")
         res = make_response( template.render(r=rezept, passphrase=passphrase))
-        res.set_cookie( "pass", "ok")
         return res
 
 @app.route("/r/<id>")
