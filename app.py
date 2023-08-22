@@ -132,7 +132,8 @@ def rezepte_edit(id):
             rezept = dict(title="",tags="",prep="",ingredients="",id="")
         environment = jinja2.Environment()
         template = environment.from_string(page(edit_page))
-        res = make_response( template.render(r=rezept, passphrase=request.cookies["pass"]))
+        passphrase= request.cookies.get("pass")
+        res = make_response( template.render(r=rezept, passphrase=passphrase))
         res.set_cookie( "pass", "ok")
         return res
 
