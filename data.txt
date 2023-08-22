@@ -7,10 +7,10 @@
     "id": "e09cb81e-70c0-476b-aecc-a47619b1e6d4"
   },
   {
-    "title": "Kein Essen",
+    "title": "Kein Essen 2",
     "ingredients": "asdasd",
-    "prep": "",
+    "prep": "aabb",
     "tags": "",
-    "id": "91d1858d-3c70-45bc-95a4-f2f2c0179aa5"
+    "id": "772f19d1-459f-41d1-ac0c-7ec50f8748a6"
   }
 ]

@@ -1,5 +1,5 @@
 from typing import List
-from flask import Flask, redirect
+from flask import Flask, redirect, make_response
 from flask import request
 import json
 import jinja2
@@ -41,12 +41,9 @@ header = """
                     width: 500px;
                     border-radius: 15px;
                 }
-                .indent {
-                    padding: 20px;
-                }
                 </style>
                 <main>
-                <a href="/">HOME</a> <a href="/e/new">HINZUFÜGEN</a>
+                <div><a href="/">HOME</a> <a href="/e/new">HINZUFÜGEN</a></div>
                 """
 footer = """
                 </main>
@@ -64,13 +61,17 @@ main_page = """
                 """
 
 edit_page= """
-                <form method="post" action="/" class="indent">
+                <form method="post" action="/">
                 Titel :<br> <input name="title" value="{{r.title}}"></input><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients}}</textarea><br>
-                Zubereitung:<br> <textarea name="prep" rows="5" cols="33"> {{r.prep}}</textarea><br>
+                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep}}</textarea><br>
                 <br>
+                {% if not passphrase %}
                 Passphrase:<br> <input name="pass"/><br>
+                {% else %}
+                <input name="pass" value="ichessegernekuchen" type="hidden"/><br>
+                {%endif%}
                 <input type="hidden" name="id" value="{{r.id}}"/>
                 <button type="submit">Abschicken</button>
                 </form>
@@ -80,10 +81,10 @@ edit_page= """
 recepie_page = """
                     <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                     <h1>{{r.title}}</h1>
-                    <h3> Zutaten: </h3>
-                    <h4><pre>{{r.ingredients}}</pre></h4><br>
-                    <h3> Zubereitung: </h3>
-                    <h4><pre>{{r.prep}}</pre><h4>
+                    <h3 style="text-decoration: underline;"> Zutaten: </h3>
+                    <h4><pre>{{r.ingredients}}</pre></h4>
+                    <h3 style="text-decoration: underline;"> Zubereitung: </h3>
+                    <h4><pre>{{r.prep}}</pre></h4>
                     <a href="/e/{{r.id}}">Editieren</a>
                 """
 
@@ -97,7 +98,7 @@ def main():
         except:
             rezepte = []
         if request.method == "POST":
-            if request.form["pass"]=="ichessegernekuchen":
+            if request.form["pass"]=="ichessegernekuchen" or "pass" in request.cookies:
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
                 print(request.form["title"])
                 if request.form.get("id")!=None:
@@ -131,7 +132,9 @@ def rezepte_edit(id):
             rezept = dict(title="",tags="",prep="",ingredients="",id="")
         environment = jinja2.Environment()
         template = environment.from_string(page(edit_page))
-        return template.render(r=rezept)
+        res = make_response( template.render(r=rezept, passphrase=request.cookies["pass"]))
+        res.set_cookie( "pass", "ok")
+        return res
 
 @app.route("/r/<id>")
 def rezepte_show(id):
