@@ -6,7 +6,7 @@ authors = ["Iamjava <jan.vaorin@tu-dortmund.de>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.7"
 flask = "^2.3.2"
 
 [build-system]
