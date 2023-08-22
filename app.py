@@ -51,19 +51,42 @@ footer = """
                 </html>
                 """
 main_page = """
+                <script>
+                    function myFunction() {
+                      // Declare variables
+                      var input, filter, ul, li, a, i, txtValue;
+                      input = document.getElementById('myInput');
+                      filter = input.value.toUpperCase();
+                      ul = document.getElementById("myUL");
+                      li = ul.getElementsByTagName('li');
+
+                      // Loop through all list items, and hide those who don't match the search query
+                      for (i = 0; i < li.length; i++) {
+                        a = li[i].getElementsByTagName("a")[0];
+                        txtValue = a.textContent || a.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                          li[i].style.display = "";
+                        } else {
+                          li[i].style.display = "none";
+                        }
+                      }
+                    }
+                    </script>
                 <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                 REZEPTE: 
-                    <ul>
-                {% for r in recepies%}
-                    <li><h2><a href="/r/{{r.id}}">{{ r.title }}</a></h2></li>
-                {% endfor %}
-                </ul>
-                """
+                     <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
+                    <ul id="myUL">
+                    {% for r in recepies%}
+                        <li><h2><a href="/r/{{r.id}}">{{ r.title }}</a></h2></li>
+                    {% endfor %}
+                    </ul>
+
+                    """
 
 edit_page= """
-                <form method="post" action="/">
-                Titel :<br> <input name="title" value="{{r.title}}"></input><br>
-                Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags}}"/><br>
+                    <form method="post" action="/">
+                    Titel :<br> <input name="title" value="{{r.title}}"></input><br>
+                    Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep}}</textarea><br>
                 <br>
