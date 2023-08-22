@@ -16,20 +16,24 @@ header = """
                 <style>
                 *{
                     font-size: 20px;
+                    color: #E9C46A;
                 }
                 body{
-                    background: gray;
+                    background: #264653;
                 }
-                textarea{
-                    background: whitesmoke;
-                    border: 0px;
+                a:visited {
+                      color: #F4A261;
+                }
+                textarea,input {
+                    background: #2A9D8F;
+                    border: 3px solid #264653;
                 }
                 main{
                         padding: 40px;
                 }
                 details{
                     padding:40px 0 40px 0;
-                    background: blue;
+                    background: #2A9D8F;
                     width: 500px;
                     border-radius: 15px;
                 }
