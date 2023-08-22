@@ -17,9 +17,13 @@ header = """
                 *{
                     font-size: 20px;
                     color: #E9C46A;
+                    font-family: "Georgia"
                 }
                 body{
                     background: #264653;
+                }
+                a {
+                    color: #E9C46A;
                 }
                 a:visited {
                       color: #F4A261;
@@ -75,7 +79,7 @@ edit_page= """
 
 recepie_page = """
                     <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
-                    <h1>{{r.title}}</h1><br>
+                    <h1>{{r.title}}</h1>
                     <h3> Zutaten: </h3>
                     <h4><pre>{{r.ingredients}}</pre></h4><br>
                     <h3> Zubereitung: </h3>
