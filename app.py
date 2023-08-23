@@ -4,6 +4,7 @@ from flask import request
 import json
 import jinja2
 import uuid
+import os
 
 app = Flask(__name__)
 header = """
@@ -131,7 +132,8 @@ def main():
         except:
             rezepte = []
         if request.method == "POST":
-            if request.form["pass"]=="ichessegernekuchen" or "pass" in request.cookies:
+            print(os.environ.get("RECEPIE_PASSPHRASE"))
+            if request.form["pass"]==(os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or "pass" in request.cookies:
                 if request.form["title"]=="":
                     return page("Please enter at least a title")
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
