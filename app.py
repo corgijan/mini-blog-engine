@@ -25,7 +25,13 @@ header = """
                 a {
                     color: #E9C46A;
                 }
+                .add {
+                    color: #E9C46A !important;
+                }
                 a:visited {
+                      color: #F4A261;
+                }
+                .home{
                       color: #F4A261;
                 }
                 textarea,input {
@@ -33,7 +39,8 @@ header = """
                     border: 3px solid #264653;
                 }
                 main{
-                        padding: 40px;
+                    padding: 40px;
+                    max-width: 500px;
                 }
                 details{
                     padding:40px 0 40px 0;
@@ -41,9 +48,12 @@ header = """
                     width: 500px;
                     border-radius: 15px;
                 }
+                .pre{
+                    white-space: pre-wrap;
+                }
                 </style>
                 <main>
-                <div><a href="/">HOME</a> <a href="/e/new">HINZUFÜGEN</a></div>
+                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a></div>
                 """
 footer = """
                 </main>
@@ -105,9 +115,9 @@ recepie_page = """
                     <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                     <h1>{{r.title|e}}</h1>
                     <h3 style="text-decoration: underline;"> Zutaten: </h3>
-                    <h4><pre>{{r.ingredients|e}}</pre></h4>
+                    <h4><p class="pre">{{r.ingredients|e}}</p></h4>
                     <h3 style="text-decoration: underline;"> Zubereitung: </h3>
-                    <h4><pre>{{r.prep|e}}</pre></h4>
+                    <h4><p class="pre">{{r.prep|e}}</p></h4>
                     <a href="/e/{{r.id}}">Editieren</a>
                 """
 
