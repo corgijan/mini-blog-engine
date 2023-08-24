@@ -83,7 +83,7 @@ main_page = """
                       }
                     }
                     </script>
-                <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
+                <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: 
                      <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
                     <ul id="myUL">
