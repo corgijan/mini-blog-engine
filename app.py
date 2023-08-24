@@ -16,9 +16,14 @@ header = """
                 <body>
                 <style>
                 *{
-                    font-size: 20px;
+                    font-size: 50px;
                     color: #E9C46A;
                     font-family: "Georgia"
+                }
+                @media (max-width:520px)  { 
+                    *{
+                        font-size: 20px;
+                    }
                 }
                 body{
                     background: #264653;
