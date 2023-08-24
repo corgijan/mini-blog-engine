@@ -85,7 +85,7 @@ main_page = """
                     }
                     </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
-                REZEPTE: 
+                REZEPTE: <br>
                      <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
                     <ul id="myUL">
                     {% for r in recepies%}
