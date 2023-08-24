@@ -12,6 +12,7 @@ header = """
                 <html>
                 <head>
                 <title>Bäcker One</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
                 </head>
                 <body>
                 <style>
@@ -22,7 +23,7 @@ header = """
                 }
                 @media (max-width:620px)  { 
                     *{
-                        font-size: 35px;
+                        font-size: 30px;
                     }
                 }
                 body{
