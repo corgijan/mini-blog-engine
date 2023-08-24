@@ -65,41 +65,40 @@ footer = """
                 """
 main_page = """
                 <script>
-                    function myFunction() {
-                      // Declare variables
-                      var input, filter, ul, li, a, i, txtValue;
-                      input = document.getElementById('myInput');
-                      filter = input.value.toUpperCase();
-                      ul = document.getElementById("myUL");
-                      li = ul.getElementsByTagName('li');
+                function myFunction() {
+                    // Declare variables
+                    var input, filter, ul, li, a, i, txtValue;
+                    input = document.getElementById('myInput');
+                    filter = input.value.toUpperCase();
+                    ul = document.getElementById("myUL");
+                    li = ul.getElementsByTagName('li');
 
-                      // Loop through all list items, and hide those who don't match the search query
-                      for (i = 0; i < li.length; i++) {
+                    // Loop through all list items, and hide those who don't match the search query
+                    for (i = 0; i < li.length; i++) {
                         a = li[i].getElementsByTagName("a")[0];
                         txtValue = a.textContent || a.innerText;
                         if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                          li[i].style.display = "";
+                            li[i].style.display = "";
                         } else {
-                          li[i].style.display = "none";
+                            li[i].style.display = "none";
                         }
-                      }
                     }
-                    </script>
+                }
+                </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
-                     <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
-                    <ul id="myUL">
+                <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
+                <ul id="myUL">
                     {% for r in recepies%}
-                        <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}</a></h2></li>
+                    <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}</a></h2></li>
                     {% endfor %}
-                    </ul>
-
-                    """
+                </ul>
+                """
 
 edit_page= """
-                    <form method="post" action="/">
-                    Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
-                    Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
+                <form method="post" action="/">
+                Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
+                Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
                 <br>
@@ -108,20 +107,29 @@ edit_page= """
                 {% else %}
                     Passphrase:<br> <input name="pass"/><br>
                 {%endif%}
-                <input type="hidden" name="id" value="{{r.id|e}}"/>
-                <button type="submit">Abschicken</button>
+                <input type="hidden" name="id" value="{{r.id|e}}"/><br>
+                <div class="del" style="display:none">
+                Zum Löschen, Rezepttitel eingeben :<br> 
+                <input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
+                <div style="display:flex; gap:10px;">
+                <button class="del" type="submit">Abschicken</button>
+                <button class="del" type="button" onclick="for(let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
+                <button class="del" id="del-submit" type="submit" style="display:none">Abschicken</button>
+                </div>
                 </form>
+                <br>
+
 
 """
 
 recepie_page = """
-                    <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
-                    <h1>{{r.title|e}}</h1>
-                    <h3 style="text-decoration: underline;"> Zutaten: </h3>
-                    <h4><p class="pre">{{r.ingredients|e}}</p></h4>
-                    <h3 style="text-decoration: underline;"> Zubereitung: </h3>
-                    <h4><p class="pre">{{r.prep|e}}</p></h4>
-                    <a href="/e/{{r.id}}">Editieren</a>
+                <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
+                <h1>{{r.title|e}}</h1>
+                <h3 style="text-decoration: underline;"> Zutaten: </h3>
+                <h4><p class="pre">{{r.ingredients|e}}</p></h4>
+                <h3 style="text-decoration: underline;"> Zubereitung: </h3>
+                <h4><p class="pre">{{r.prep|e}}</p></h4>
+                <a href="/e/{{r.id}}">Editieren</a>
                 """
 
 
@@ -134,7 +142,6 @@ def main():
         except:
             rezepte = []
         if request.method == "POST":
-            print(os.environ.get("RECEPIE_PASSPHRASE"))
             if request.form["pass"]==(os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
                 session['authenticated'] = True
                 if request.form["title"]=="":
@@ -142,16 +149,19 @@ def main():
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
                 if request.form.get("id")!=None:
                     rezepte = list(filter(lambda x: x["id"] != request.form["id"],rezepte))
-                rezepte.append(rezept)
-                print(rezept)
+                if request.form["del-title"]!=request.form["title"]:
+                    if request.form["del-title"]!="":
+                        return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
+                    rezepte.append(rezept)
                 with open("data.txt","w") as data:
                     data.write(json.dumps(rezepte,indent=2))
                 environment = jinja2.Environment()
                 template = environment.from_string(page(edit_page))
-                res = make_response(redirect("/r/"+rezept["id"]))
-                return res
+                if request.form["del-title"]==request.form["title"]:
+                    return make_response(redirect("/"))
+                return make_response(redirect("/r/"+rezept["id"]))
             else:
-                return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert")
+                return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
         environment = jinja2.Environment()
         template = environment.from_string(page(main_page))
         return template.render(recepies=rezepte)
