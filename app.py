@@ -22,21 +22,12 @@ header = """
                     color: #E9C46A;
                     font-family: "Georgia"
                 }
-                body{
-                    background: #264653;
-                }
-                a {
-                    color: #E9C46A;
-                }
-                .add {
-                    color: #E9C46A !important;
-                }
-                a:visited {
-                      color: #F4A261;
-                }
-                .home{
-                      color: #F4A261;
-                }
+                body{ background: #264653; }
+
+                .add { color: #E9C46A !important; }
+
+                a:visited, .home { color: #F4A261; }
+                
                 textarea,input {
                     background: #2A9D8F;
                     border: 3px solid #264653;
@@ -51,9 +42,7 @@ header = """
                     width: 500px;
                     border-radius: 15px;
                 }
-                .pre{
-                    white-space: pre-wrap;
-                }
+                .pre{ white-space: pre-wrap; }
                 </style>
                 <main>
                 <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a></div>
@@ -65,30 +54,19 @@ footer = """
                 """
 main_page = """
                 <script>
-                function myFunction() {
-                    // Declare variables
-                    var input, filter, ul, li, a, i, txtValue;
-                    input = document.getElementById('myInput');
-                    filter = input.value.toUpperCase();
-                    ul = document.getElementById("myUL");
-                    li = ul.getElementsByTagName('li');
-
-                    // Loop through all list items, and hide those who don't match the search query
-                    for (i = 0; i < li.length; i++) {
-                        a = li[i].getElementsByTagName("a")[0];
-                        txtValue = a.textContent || a.innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            li[i].style.display = "";
-                        } else {
-                            li[i].style.display = "none";
-                        }
+                function filterRecepies() {
+                    let filter = document.getElementById('recepiesFilter').value.toUpperCase();
+                    for (let li of document.getElementById('recepiesList').getElementsByTagName('li')) {
+                        let a = li.getElementsByTagName('a')[0];
+                        let txtValue = a.textContent || a.innerText;
+                        li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
                 </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
-                <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
-                <ul id="myUL">
+                <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Search for names..">
+                <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}</a></h2></li>
                     {% endfor %}
@@ -113,13 +91,11 @@ edit_page= """
                 <input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
                 <div style="display:flex; gap:10px;">
                 <button class="del" type="submit">Abschicken</button>
-                <button class="del" type="button" onclick="for(let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
+                <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
                 <button class="del" id="del-submit" type="submit" style="display:none">Abschicken</button>
                 </div>
                 </form>
                 <br>
-
-
 """
 
 recepie_page = """
