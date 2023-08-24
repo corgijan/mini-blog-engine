@@ -1,12 +1,13 @@
 from typing import List
 from flask import Flask, redirect, make_response
-from flask import request
+from flask import request, session
 import json
 import jinja2
 import uuid
 import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(32)
 header = """
                 <!DOCTYPE html>
                 <html>
@@ -102,8 +103,8 @@ edit_page= """
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
                 <br>
-                {% if passphrase %}
-                    <input name="pass" value="ichessegernekuchen" type="hidden"/><br>
+                {% if authenticated %}
+                    <input name="pass" value="" type="hidden"/><br>
                 {% else %}
                     Passphrase:<br> <input name="pass"/><br>
                 {%endif%}
@@ -134,7 +135,8 @@ def main():
             rezepte = []
         if request.method == "POST":
             print(os.environ.get("RECEPIE_PASSPHRASE"))
-            if request.form["pass"]==(os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or "pass" in request.cookies:
+            if request.form["pass"]==(os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
+                session['authenticated'] = True
                 if request.form["title"]=="":
                     return page("Please enter at least a title")
                 rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
@@ -146,9 +148,7 @@ def main():
                     data.write(json.dumps(rezepte,indent=2))
                 environment = jinja2.Environment()
                 template = environment.from_string(page(edit_page))
-                passphrase= request.cookies.get("pass")
                 res = make_response(redirect("/r/"+rezept["id"]))
-                res.set_cookie( "pass", "ok")
                 return res
             else:
                 return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert")
@@ -174,8 +174,8 @@ def rezepte_edit(id):
             rezept = dict(title="",tags="",prep="",ingredients="",id="")
         environment = jinja2.Environment()
         template = environment.from_string(page(edit_page))
-        passphrase= request.cookies.get("pass")
-        res = make_response( template.render(r=rezept, passphrase=passphrase))
+        authenticated = 'authenticated' in session
+        res = make_response( template.render(r=rezept, authenticated=authenticated))
         return res
 
 @app.route("/r/<id>")
