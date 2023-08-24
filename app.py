@@ -21,11 +21,6 @@ header = """
                     color: #E9C46A;
                     font-family: "Georgia"
                 }
-                @media (max-width:620px)  { 
-                    *{
-                        font-size: 30px;
-                    }
-                }
                 body{
                     background: #264653;
                 }
