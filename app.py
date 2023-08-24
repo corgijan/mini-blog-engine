@@ -41,7 +41,7 @@ header = """
                 }
                 main{
                     padding: 40px;
-                    max-width: 500px;
+                    max-width: 800px;
                 }
                 details{
                     padding:40px 0 40px 0;
