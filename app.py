@@ -24,7 +24,7 @@ header = """
                 }
                 body{ background: #264653; }
                 .add { color: #E9C46A !important; }
-                .a { color: #E9C46A; }
+                a { color: #E9C46A; }
                 a:visited, .home { color: #F4A261; }
                 textarea,input {
                     background: #2A9D8F;
