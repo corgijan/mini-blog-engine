@@ -61,20 +61,28 @@ main_page = """
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
+                function sortRecepies() {
+                    let list = document.getElementById('recepiesList')
+                    Array.from(list.getElementsByTagName('li'))
+                        .sort((a, b) => (sortSelector.value === 'asc' ? 1 : -1) * (a.innerText).localeCompare(b.innerText))
+                        .forEach(item => list.appendChild(item));
+                }
                 </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
                 <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
+                <select id="sortSelector" onchange="sortRecepies()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
                 <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                 </ul>
+                <script>sortRecepies()</script>
                 """
 
 edit_page = """
                 <form method="post" action="/">
-                Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
+                Titel:<br> <input name="title" value="{{r.title|e}}"></input><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
@@ -85,13 +93,10 @@ edit_page = """
                     Passphrase:<br> <input name="pass"/><br>
                 {%endif%}
                 <input type="hidden" name="id" value="{{r.id|e}}"/><br>
-                <div class="del" style="display:none">
-                Zum Löschen, Rezepttitel eingeben :<br> 
-                <input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
+                <div class="del" style="display:none">Zum Löschen, Rezepttitel eingeben:<br><input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
                 <div style="display:flex; gap:10px;">
-                <button class="del" type="submit">Abschicken</button>
-                <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
-                <button class="del" id="del-submit" type="submit" style="display:none">Abschicken</button>
+                    <button  id="del-submit" type="submit">Abschicken</button>
+                    <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
                 </div>
                 </form>
                 <br>
