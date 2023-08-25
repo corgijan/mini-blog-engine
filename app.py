@@ -73,7 +73,7 @@ main_page = """
 
 edit_page= """
                 <form method="post" action="/">
-                Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
+                Titel:<br> <input name="title" value="{{r.title|e}}"></input><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
@@ -84,13 +84,10 @@ edit_page= """
                     Passphrase:<br> <input name="pass"/><br>
                 {%endif%}
                 <input type="hidden" name="id" value="{{r.id|e}}"/><br>
-                <div class="del" style="display:none">
-                Zum Löschen, Rezepttitel eingeben :<br> 
-                <input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
+                <div class="del" style="display:none">Zum Löschen, Rezepttitel eingeben:<br><input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
                 <div style="display:flex; gap:10px;">
-                <button class="del" type="submit">Abschicken</button>
-                <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
-                <button class="del" id="del-submit" type="submit" style="display:none">Abschicken</button>
+                    <button  id="del-submit" type="submit">Abschicken</button>
+                    <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
                 </div>
                 </form>
                 <br>
@@ -129,7 +126,7 @@ def main():
                         return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
                     rezepte.append(rezept)
                 with open("data.txt","w") as data:
-                    data.write(json.dumps(rezepte,indent=2))
+                    data.write(json.dumps(sorted(rezepte, key=lambda k: k.get('title','')),indent=2))
                 environment = jinja2.Environment()
                 template = environment.from_string(page(edit_page))
                 if request.form["del-title"]==request.form["title"]:
