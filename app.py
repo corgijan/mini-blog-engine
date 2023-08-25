@@ -41,15 +41,16 @@ header = """
                     border-radius: 15px;
                 }
                 .pre{ white-space: pre-wrap; }
+                .norm{ background: #264653;border:0px;text-decoration: underline; }
                 </style>
                 <main>
-                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a></div>
+                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('Jan.vaorin(at)gmail(punkt)de All Cookies are functional ones')">IMPRESSUM</button></div>
                 """
 footer = """
                 </main>
                 </body>
                 </html>
-                """
+               """
 main_page = """
                 <script>
                 function filterRecepies() {
@@ -71,7 +72,7 @@ main_page = """
                 </ul>
                 """
 
-edit_page= """
+edit_page = """
                 <form method="post" action="/">
                 Titel :<br> <input name="title" value="{{r.title|e}}"></input><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
@@ -108,71 +109,75 @@ recepie_page = """
                 """
 
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def main():
     rezepte = []
-    with open("data.txt","r") as data:
+    with open("data.txt", "r") as data:
         try:
             rezepte = json.loads(data.read())
         except:
             rezepte = []
         if request.method == "POST":
-            if request.form["pass"]==(os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
+            if request.form["pass"] == (
+                    os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
                 session['authenticated'] = True
-                if request.form["title"]=="":
+                if request.form["title"] == "":
                     return page("Please enter at least a title")
-                rezept = dict(title=request.form["title"][0:3000],ingredients=request.form["ingredients"][0:3000],prep=request.form["prep"][0:3000],tags=request.form["tags"][0:3000] ,id=uuid.uuid4().__str__())
-                if request.form.get("id")!=None:
-                    rezepte = list(filter(lambda x: x["id"] != request.form["id"],rezepte))
-                if request.form["del-title"]!=request.form["title"]:
-                    if request.form["del-title"]!="":
+                rezept = dict(title=request.form["title"][0:3000], ingredients=request.form["ingredients"][0:3000],
+                              prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
+                              id=uuid.uuid4().__str__())
+                if request.form.get("id") is not None:
+                    rezepte = list(filter(lambda x: x["id"] != request.form["id"], rezepte))
+                if request.form["del-title"] != request.form["title"]:
+                    if request.form["del-title"] != "":
                         return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
                     rezepte.append(rezept)
-                with open("data.txt","w") as data:
-                    data.write(json.dumps(rezepte,indent=2))
+                with open("data.txt", "w") as data:
+                    data.write(json.dumps(rezepte, indent=2))
                 environment = jinja2.Environment()
                 template = environment.from_string(page(edit_page))
-                if request.form["del-title"]==request.form["title"]:
+                if request.form["del-title"] == request.form["title"]:
                     return make_response(redirect("/"))
-                return make_response(redirect("/r/"+rezept["id"]))
+                return make_response(redirect("/r/" + rezept["id"]))
             else:
                 return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
         environment = jinja2.Environment()
         template = environment.from_string(page(main_page))
         return template.render(recepies=rezepte)
-           
+
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
     rezepte = []
-    with open("data.txt","r") as data:
-        try: 
+    with open("data.txt", "r") as data:
+        try:
             rezepte: List[dict] = json.loads(data.read())
         except:
             rezepte = []
-        if id!="new":
-            rezept = list(filter(lambda x: x["id"] == id,rezepte))
-            if rezept==[]: 
+        if id != "new":
+            rezept = list(filter(lambda x: x["id"] == id, rezepte))
+            if not rezept:
                 return page("Rezept nicht gefunden :(")
             rezept = rezept[0]
         else:
-            rezept = dict(title="",tags="",prep="",ingredients="",id="")
+            rezept = dict(title="", tags="", prep="", ingredients="", id="")
         environment = jinja2.Environment()
         template = environment.from_string(page(edit_page))
         authenticated = 'authenticated' in session
-        res = make_response( template.render(r=rezept, authenticated=authenticated))
+        res = make_response(template.render(r=rezept, authenticated=authenticated))
         return res
+
 
 @app.route("/r/<id>")
 def rezepte_show(id):
     rezepte = []
-    with open("data.txt","r") as data:
-        try: 
+    with open("data.txt", "r") as data:
+        try:
             rezepte: List[dict] = json.loads(data.read())
         except:
             rezepte = []
-        rezept = list(filter(lambda x: x["id"] == id,rezepte))
-        if rezept!=[]:
+        rezept = list(filter(lambda x: x["id"] == id, rezepte))
+        if rezept:
             rezept = rezept[0]
             environment = jinja2.Environment()
             template = environment.from_string(page(recepie_page))
