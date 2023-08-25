@@ -65,7 +65,7 @@ main_page = """
                 </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
-                <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Search for names..">
+                <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
                 <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
@@ -101,6 +101,7 @@ edit_page= """
 recepie_page = """
                 <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                 <h1>{{r.title|e}}</h1>
+                <h3>Tags: {{r.tags|e}}</h3>
                 <h3 style="text-decoration: underline;"> Zutaten: </h3>
                 <h4><p class="pre">{{r.ingredients|e}}</p></h4>
                 <h3 style="text-decoration: underline;"> Zubereitung: </h3>
