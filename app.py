@@ -60,15 +60,23 @@ main_page = """
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
+                function sortRecepies() {
+                    let list = document.getElementById('recepiesList')
+                    Array.from(list.getElementsByTagName('li'))
+                        .sort((a, b) => (sortSelector.value === 'asc' ? 1 : -1) * (a.innerText).localeCompare(b.innerText))
+                        .forEach(item => list.appendChild(item));
+                }
                 </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
                 <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
+                <select id="sortSelector" onchange="sortRecepies()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
                 <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                 </ul>
+                <script>sortRecepies()</script>
                 """
 
 edit_page= """
@@ -126,7 +134,7 @@ def main():
                         return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
                     rezepte.append(rezept)
                 with open("data.txt","w") as data:
-                    data.write(json.dumps(sorted(rezepte, key=lambda k: k.get('title','')),indent=2))
+                    data.write(json.dumps(rezepte,indent=2))
                 environment = jinja2.Environment()
                 template = environment.from_string(page(edit_page))
                 if request.form["del-title"]==request.form["title"]:
