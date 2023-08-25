@@ -59,7 +59,6 @@ main_page = """
                     for (let li of document.getElementById('recepiesList').getElementsByTagName('li')) {
                         let a = li.getElementsByTagName('a')[0];
                         let txtValue = a.textContent || a.innerText;
-                        console.log(a.innerText)
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
