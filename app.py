@@ -59,6 +59,7 @@ main_page = """
                     for (let li of document.getElementById('recepiesList').getElementsByTagName('li')) {
                         let a = li.getElementsByTagName('a')[0];
                         let txtValue = a.textContent || a.innerText;
+                        console.log(a.innerText)
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
@@ -68,7 +69,7 @@ main_page = """
                 <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Search for names..">
                 <ul id="recepiesList">
                     {% for r in recepies%}
-                    <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}</a></h2></li>
+                    <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                 </ul>
                 """
