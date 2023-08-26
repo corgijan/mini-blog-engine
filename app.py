@@ -2,9 +2,14 @@ from typing import List
 from flask import Flask, redirect, make_response, request, session
 import json, jinja2, uuid, os, sqlite3, re
 
+def get_db_conn():
+    conn = sqlite3.connect('data.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
 app = Flask(__name__)
 app.secret_key = os.urandom(32)
-sqlite3.connect('data.db').execute("CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)").close()
+get_db_conn().execute("CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)").close()
 header = """
                 <!DOCTYPE html>
                 <html>
@@ -68,7 +73,9 @@ main_page = """
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
                 <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
+                {% if recepies_count >= 50 %}
                 <select id="sortSelector" onchange="sortRecepies()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+                {% endif %}
                 <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
@@ -119,12 +126,12 @@ def main():
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
             if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
-            conn = get_db_connection()
+            conn = get_db_conn()
             if request.form["del-title"] != "":
-                conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id if is_uuid(id) else "0",))
+                conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
             else:
                 if request.form.get("id", "") != "":
-                    conn.cursor().execute("UPDATE recipes SET title=?, ingredients=?, prep=?, tags=?, cvss=? WHERE id = ?", (request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0), id if is_uuid(id) else "0"))
+                    conn.cursor().execute("UPDATE recipes SET title=?, ingredients=?, prep=?, tags=?, cvss=? WHERE id = ?", (request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0), id))
                 else:
                     conn.cursor().execute("INSERT INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (id, request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
             conn.commit()
@@ -134,18 +141,18 @@ def main():
             return make_response(redirect("/r/"+id))
         else:
             return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
-    conn = get_db_connection()
+    conn = get_db_conn()
     recepie_rows = conn.cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
     conn.close()
     recepies = [dict(row) for row in recepie_rows]
     template = jinja2.Environment().from_string(page(main_page))
-    return template.render(recepies=recepies)
+    return template.render(recepies=recepies, recepies_count=len(recepies))
            
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
     if id!="new":
-        conn = get_db_connection()
+        conn = get_db_conn()
         print(id)
         recepie_row = conn.cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
         conn.close()
@@ -159,7 +166,7 @@ def rezepte_edit(id):
 
 @app.route("/r/<id>")
 def rezepte_show(id):
-    conn = get_db_connection()
+    conn = get_db_conn()
     recepie_row = conn.cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
     conn.close()
     if recepie_row is None: return page("Rezept nicht gefunden :(")
@@ -170,11 +177,3 @@ def rezepte_show(id):
 
 def page(name):
     return header + name + footer
-
-def is_uuid(uuid: str):
-    return re.match("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", uuid.lower())
-
-def get_db_connection():
-    conn = sqlite3.connect('data.db')
-    conn.row_factory = sqlite3.Row
-    return conn
