@@ -118,7 +118,7 @@ recepie_page = """
                 """
 
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def main():
     if request.method == "POST":
         if request.form["pass"] == (os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
@@ -147,7 +147,7 @@ def main():
     recepies = [dict(row) for row in recepie_rows]
     template = jinja2.Environment().from_string(page(main_page))
     return template.render(recepies=recepies, recepies_count=len(recepies))
-           
+
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
@@ -164,6 +164,7 @@ def rezepte_edit(id):
     authenticated = 'authenticated' in session
     return make_response( template.render(r=recepie, authenticated=authenticated))
 
+
 @app.route("/r/<id>")
 def rezepte_show(id):
     conn = get_db_conn()
@@ -173,7 +174,7 @@ def rezepte_show(id):
     recepie = dict(recepie_row)
     template = jinja2.Environment().from_string(page(recepie_page))
     return template.render(r=recepie)
-            
+
 
 def page(name):
     return header + name + footer
