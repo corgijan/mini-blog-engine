@@ -164,7 +164,6 @@ def rezepte_edit(id):
     template = jinja2.Environment().from_string(page(edit_page))
     return make_response( template.render(r=recepie, authenticated=('authenticated' in session)))
 
-
 @app.route("/r/<id>")
 def rezepte_show(id):
     recepie_row = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
