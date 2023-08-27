@@ -128,7 +128,7 @@ def teardown_db(exception):
     if db is not None: db.close()
 
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def main():
     if request.method == "POST":
         print(request.form['pass'])
@@ -163,6 +163,7 @@ def rezepte_edit(id):
         recepie = dict(title="",tags="",prep="",ingredients="",id="")
     template = jinja2.Environment().from_string(page(edit_page))
     return make_response( template.render(r=recepie, authenticated=('authenticated' in session)))
+
 
 @app.route("/r/<id>")
 def rezepte_show(id):
