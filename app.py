@@ -24,14 +24,11 @@ header = """
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
                 a:visited, .home { color: #F4A261; }
-                textarea,input {
+                textarea, input {
                     background: #2A9D8F;
                     border: 3px solid #264653;
                 }
-                main{
-                    padding: 40px;
-                    max-width: 800px;
-                }
+                main { padding: 40px; max-width: 800px; }
                 details{
                     padding:40px 0 40px 0;
                     background: #2A9D8F;
@@ -78,7 +75,6 @@ main_page = """
                     {% endfor %}
                 </ul>
                 """
-
 edit_page = """
                 <form method="post" enctype="multipart/form-data" action="/">
                 Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
@@ -100,8 +96,7 @@ edit_page = """
                 </div>
                 </form>
                 <br>
-"""
-
+                """
 recepie_page = """
                 <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                 <h1>{{r.title|e}}</h1>
@@ -129,11 +124,9 @@ def teardown_db(exception):
     db = g.pop('db', None)
     if db is not None: db.close()
 
-
 @app.route("/", methods=["GET", "POST"])
 def main():
     if request.method == "POST":
-        print(request.form['pass'])
         if request.form["pass"] == (os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
             session['authenticated'] = True
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
