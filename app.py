@@ -168,7 +168,7 @@ def rezepte_edit(id):
     else:
         recepie = dict(title="",tags="",prep="",ingredients="",id="")
     template = jinja2.Environment().from_string(page(edit_page))
-    return make_response( template.render(r=recepie, authenticated=('authenticated' in session), imagetypes=(','.join(ALLOWED_IMAGETYPES)), img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id']))))
+    return make_response( template.render(r=recepie, authenticated=('authenticated' in session), img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id']))))
 
 @app.route("/r/<id>")
 def rezepte_show(id):
