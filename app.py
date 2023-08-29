@@ -4,7 +4,6 @@ import jinja2, uuid, os, sqlite3
 app = Flask(__name__)
 app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
-ALLOWED_IMAGETYPES = {'image/webp', 'image/jpeg', 'image/png'}
 
 header = """
                 <!DOCTYPE html>
@@ -82,7 +81,7 @@ main_page = """
 
 edit_page = """
                 <form method="post" enctype="multipart/form-data" action="/">
-                Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="{{imagetypes}}" /><br>
+                Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
                 Titel:<br> <input name="title" value="{{r.title|e}}" /><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
@@ -140,7 +139,7 @@ def main():
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
             if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
-            if 'image' in request.files and request.files['image'].mimetype in ALLOWED_IMAGETYPES:
+            if 'image' in request.files and request.files['image'].mimetype in {'image/webp', 'image/jpeg', 'image/png'}:
                 if not os.path.exists('static'): os.makedirs('static')
                 request.files['image'].save(os.path.join('static', id))
             conn = get_db()
