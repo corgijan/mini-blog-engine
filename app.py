@@ -1,9 +1,10 @@
-from typing import List
-from flask import Flask, redirect, make_response, request, session, g
-import json, jinja2, uuid, os, sqlite3, re
+from flask import Flask, redirect, make_response, request, session, g, url_for
+import jinja2, uuid, os, sqlite3
 
 app = Flask(__name__)
 app.secret_key = os.urandom(64)
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+ALLOWED_IMAGETYPES = {'image/webp', 'image/jpeg', 'image/png'}
 
 header = """
                 <!DOCTYPE html>
@@ -21,6 +22,7 @@ header = """
                 }
                 body{ background: #264653; }
                 .add { color: #E9C46A !important; }
+                img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
                 a:visited, .home { color: #F4A261; }
                 textarea,input {
@@ -79,8 +81,9 @@ main_page = """
                 """
 
 edit_page = """
-                <form method="post" action="/">
-                Titel:<br> <input name="title" value="{{r.title|e}}"></input><br>
+                <form method="post" enctype="multipart/form-data" action="/">
+                Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="{{imagetypes}}" /><br>
+                Titel:<br> <input name="title" value="{{r.title|e}}" /><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
@@ -103,6 +106,7 @@ edit_page = """
 recepie_page = """
                 <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
                 <h1>{{r.title|e}}</h1>
+                {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
                 <h3>Tags: {{r.tags|e}}</h3>
                 <h3 style="text-decoration: underline;"> Zutaten: </h3>
                 <h4><p class="pre">{{r.ingredients|e}}</p></h4>
@@ -136,9 +140,13 @@ def main():
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
             if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
+            if 'image' in request.files and request.files['image'].mimetype in ALLOWED_IMAGETYPES:
+                if not os.path.exists('static'): os.makedirs('static')
+                request.files['image'].save(os.path.join('static', id))
             conn = get_db()
             if request.form["del-title"] != "":
                 conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
+                if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
             else:
                 conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (id, request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
             conn.commit()
@@ -161,7 +169,7 @@ def rezepte_edit(id):
     else:
         recepie = dict(title="",tags="",prep="",ingredients="",id="")
     template = jinja2.Environment().from_string(page(edit_page))
-    return make_response( template.render(r=recepie, authenticated=('authenticated' in session)))
+    return make_response( template.render(r=recepie, authenticated=('authenticated' in session), imagetypes=(','.join(ALLOWED_IMAGETYPES)), img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id']))))
 
 @app.route("/r/<id>")
 def rezepte_show(id):
@@ -169,4 +177,4 @@ def rezepte_show(id):
     if recepie_row is None: return page("Rezept nicht gefunden :(")
     recepie = dict(recepie_row)
     template = jinja2.Environment().from_string(page(recepie_page))
-    return template.render(r=recepie)
+    return template.render(r=recepie, img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id'])))
