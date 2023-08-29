@@ -1,13 +1,10 @@
 from typing import List
-from flask import Flask, redirect, make_response
-from flask import request, session
-import json
-import jinja2
-import uuid
-import os
+from flask import Flask, redirect, make_response, request, session, g
+import json, jinja2, uuid, os, sqlite3, re
 
 app = Flask(__name__)
-app.secret_key = os.urandom(32)
+app.secret_key = os.urandom(64)
+
 header = """
                 <!DOCTYPE html>
                 <html>
@@ -71,7 +68,9 @@ main_page = """
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
                 REZEPTE: <br>
                 <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
+                {% if recepies_count >= 50 %}
                 <select id="sortSelector" onchange="sortRecepies()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+                {% endif %}
                 <ul id="recepiesList">
                     {% for r in recepies%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
@@ -113,83 +112,62 @@ recepie_page = """
                 <a href="/e/{{r.id}}">Editieren</a>
                 """
 
+def page(name):
+    return header + name + footer
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect('data.db')
+        g.db.row_factory = sqlite3.Row
+        g.db.execute("CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)")
+    return g.db
+
+@app.teardown_appcontext
+def teardown_db(exception):
+    db = g.pop('db', None)
+    if db is not None: db.close()
+
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    rezepte = []
-    with open("data.txt", "r") as data:
-        try:
-            rezepte = json.loads(data.read())
-        except:
-            rezepte = []
-        if request.method == "POST":
-            if request.form["pass"] == (
-                    os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
-                session['authenticated'] = True
-                if request.form["title"] == "":
-                    return page("Please enter at least a title")
-                rezept = dict(title=request.form["title"][0:3000], ingredients=request.form["ingredients"][0:3000],
-                              prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
-                              id=uuid.uuid4().__str__())
-                if request.form.get("id") is not None:
-                    rezepte = list(filter(lambda x: x["id"] != request.form["id"], rezepte))
-                if request.form["del-title"] != request.form["title"]:
-                    if request.form["del-title"] != "":
-                        return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
-                    rezepte.append(rezept)
-                with open("data.txt", "w") as data:
-                    data.write(json.dumps(rezepte, indent=2))
-                environment = jinja2.Environment()
-                template = environment.from_string(page(edit_page))
-                if request.form["del-title"] == request.form["title"]:
-                    return make_response(redirect("/"))
-                return make_response(redirect("/r/" + rezept["id"]))
+    if request.method == "POST":
+        print(request.form['pass'])
+        if request.form["pass"] == (os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
+            session['authenticated'] = True
+            if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
+            if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
+            id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
+            conn = get_db()
+            if request.form["del-title"] != "":
+                conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
             else:
-                return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
-        environment = jinja2.Environment()
-        template = environment.from_string(page(main_page))
-        return template.render(recepies=rezepte)
-
+                conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (id, request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
+            conn.commit()
+            template = jinja2.Environment().from_string(page(edit_page))
+            if request.form["del-title"]==request.form["title"]: return make_response(redirect("/"))
+            return make_response(redirect("/r/"+id))
+        else:
+            return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
+    recepie_rows = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
+    recepies = [dict(row) for row in recepie_rows]
+    template = jinja2.Environment().from_string(page(main_page))
+    return template.render(recepies=recepies, recepies_count=len(recepies))
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
-    rezepte = []
-    with open("data.txt", "r") as data:
-        try:
-            rezepte: List[dict] = json.loads(data.read())
-        except:
-            rezepte = []
-        if id != "new":
-            rezept = list(filter(lambda x: x["id"] == id, rezepte))
-            if not rezept:
-                return page("Rezept nicht gefunden :(")
-            rezept = rezept[0]
-        else:
-            rezept = dict(title="", tags="", prep="", ingredients="", id="")
-        environment = jinja2.Environment()
-        template = environment.from_string(page(edit_page))
-        authenticated = 'authenticated' in session
-        res = make_response(template.render(r=rezept, authenticated=authenticated))
-        return res
-
+    if id!="new":
+        recepie_row = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+        if recepie_row is None: return page("Rezept nicht gefunden :(")
+        recepie = dict(recepie_row)
+    else:
+        recepie = dict(title="",tags="",prep="",ingredients="",id="")
+    template = jinja2.Environment().from_string(page(edit_page))
+    return make_response( template.render(r=recepie, authenticated=('authenticated' in session)))
 
 @app.route("/r/<id>")
 def rezepte_show(id):
-    rezepte = []
-    with open("data.txt", "r") as data:
-        try:
-            rezepte: List[dict] = json.loads(data.read())
-        except:
-            rezepte = []
-        rezept = list(filter(lambda x: x["id"] == id, rezepte))
-        if rezept:
-            rezept = rezept[0]
-            environment = jinja2.Environment()
-            template = environment.from_string(page(recepie_page))
-            return template.render(r=rezept)
-        else:
-            return page("Rezept nicht gefunden :(")
-
-
-def page(name):
-    return header + name + footer
+    recepie_row = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+    if recepie_row is None: return page("Rezept nicht gefunden :(")
+    recepie = dict(recepie_row)
+    template = jinja2.Environment().from_string(page(recepie_page))
+    return template.render(r=recepie)
