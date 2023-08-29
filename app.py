@@ -76,7 +76,6 @@ main_page = """
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                 </ul>
-                <script>sortRecepies()</script>
                 """
 
 edit_page = """
