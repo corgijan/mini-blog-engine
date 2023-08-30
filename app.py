@@ -4,7 +4,7 @@ import jinja2, uuid, os, sqlite3, json
 app = Flask(__name__)
 app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
-DB_DRIVER = "JSON" # JSON or SQLITE
+DB_DRIVER = "SQLITE" # JSON or SQLITE
 
 header = """
                 <!DOCTYPE html>
@@ -45,7 +45,7 @@ footer = """
                """
 main_page = """
                 <script>
-                function filterrecipes() {
+                function filterRecipes() {
                     let filter = document.getElementById('recipesFilter').value.toUpperCase();
                     for (let li of document.getElementById('recipesList').getElementsByTagName('li')) {
                         let a = li.getElementsByTagName('a')[0];
@@ -53,7 +53,7 @@ main_page = """
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
-                function sortrecipes() {
+                function sortRecipes() {
                     let list = document.getElementById('recipesList')
                     Array.from(list.getElementsByTagName('li'))
                         .sort((a, b) => (sortSelector.value === 'asc' ? 1 : -1) * (a.innerText).localeCompare(b.innerText))
@@ -62,9 +62,9 @@ main_page = """
                 </script>
                 <p>Hello at Bäckerone,<br> your responsible disclosure service for recipes!</p>
                 REZEPTE: <br>
-                <input type="text" id="recipesFilter" onkeyup="filterrecipes()" placeholder="Suche nach Rezepten,Tags..">
+                <input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
                 {% if recipes_count >= 50 %}
-                <select id="sortSelector" onchange="sortrecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+                <select id="sortSelector" onchange="sortRecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
                 {% endif %}
                 <ul id="recipesList">
                     {% for r in recipes%}
