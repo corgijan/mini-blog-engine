@@ -1,9 +1,10 @@
 from flask import Flask, redirect, make_response, request, session, g, url_for
-import jinja2, uuid, os, sqlite3
+import jinja2, uuid, os, sqlite3, json
 
 app = Flask(__name__)
 app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+DB_DRIVER = "JSON" # JSON or SQLITE
 
 header = """
                 <!DOCTYPE html>
@@ -14,11 +15,7 @@ header = """
                 </head>
                 <body>
                 <style>
-                *{
-                    font-size: 20px;
-                    color: #E9C46A;
-                    font-family: "Georgia"
-                }
+                * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
                 body{ background: #264653; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
@@ -36,10 +33,10 @@ header = """
                     border-radius: 15px;
                 }
                 .pre{ white-space: pre-wrap; }
-                .norm{ background: #264653;border:0px;text-decoration: underline; }
+                .norm{ background: #264653; border: 0px; text-decoration: underline; }
                 </style>
                 <main>
-                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('Jan.vaorin(at)gmail(punkt)de All Cookies are functional ones')">IMPRESSUM</button></div>
+                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('Jan.vaorin(at)gmail(punkt)com All Cookies are functional ones')">IMPRESSUM</button></div>
                 """
 footer = """
                 </main>
@@ -81,8 +78,7 @@ edit_page = """
                 Titel:<br> <input name="title" value="{{r.title|e}}" /><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
-                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
-                <br>
+                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br><br>
                 {% if authenticated %}
                     <input name="pass" value="" type="hidden"/><br>
                 {% else %}
@@ -112,12 +108,20 @@ recepie_page = """
 def page(name):
     return header + name + footer
 
-def get_db():
+def get_sqlite_db():
     if 'db' not in g:
         g.db = sqlite3.connect('data.db')
         g.db.row_factory = sqlite3.Row
         g.db.execute("CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)")
     return g.db
+
+def get_json_db():
+    try:
+        with open('data.json') as db_file:
+            db_recepies = json.load(db_file)
+    except Exception:
+        db_recepies = {}
+    return [{"id": id, **recepie} for id, recepie in db_recepies.items()]
 
 @app.teardown_appcontext
 def teardown_db(exception):
@@ -135,27 +139,47 @@ def main():
             if 'image' in request.files and request.files['image'].mimetype in {'image/webp', 'image/jpeg', 'image/png'}:
                 if not os.path.exists('static'): os.makedirs('static')
                 request.files['image'].save(os.path.join('static', id))
-            conn = get_db()
-            if request.form["del-title"] != "":
-                conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
-                if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
-            else:
-                conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (id, request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
-            conn.commit()
+            if DB_DRIVER == "JSON":
+                with open('data.json', 'r+') as db_file:
+                    try: recepies = json.load(db_file)
+                    except Exception: recepies = {}
+                    if request.form["del-title"] != "":
+                        if id in recepies: del recepies[id]
+                        if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                    else:
+                        recepies[id] = dict(title=request.form["title"][0:3000], ingredients=request.form["ingredients"][0:3000], prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000], cvss=0.0)
+                    db_file.seek(0)
+                    db_file.truncate()
+                    json.dump(recepies, db_file, indent=4)
+            elif DB_DRIVER == "SQLITE":
+                conn = get_sqlite_db()
+                if request.form["del-title"] != "":
+                    conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
+                    if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                else:
+                    conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (id, request.form["title"][0:3000], request.form["ingredients"][0:3000], request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
+                conn.commit()
             template = jinja2.Environment().from_string(page(edit_page))
             if request.form["del-title"]==request.form["title"]: return make_response(redirect("/"))
             return make_response(redirect("/r/"+id))
         else:
             return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
-    recepie_rows = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
-    recepies = [dict(row) for row in recepie_rows]
+    if DB_DRIVER == "JSON":
+        recepies = get_json_db()
+    elif DB_DRIVER == "SQLITE":
+        recepie_rows = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
+        recepies = [dict(row) for row in recepie_rows]
     template = jinja2.Environment().from_string(page(main_page))
     return template.render(recepies=recepies, recepies_count=len(recepies))
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
     if id!="new":
-        recepie_row = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+        if DB_DRIVER == "JSON":
+            recepie_row = list(filter(lambda r: r["id"] == id, get_json_db()))
+            recepie_row = recepie_row[0] if recepie_row else None
+        elif DB_DRIVER == "SQLITE":
+            recepie_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
         if recepie_row is None: return page("Rezept nicht gefunden :(")
         recepie = dict(recepie_row)
     else:
@@ -165,7 +189,11 @@ def rezepte_edit(id):
 
 @app.route("/r/<id>")
 def rezepte_show(id):
-    recepie_row = get_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+    if DB_DRIVER == "JSON":
+        recepie_row = list(filter(lambda r: r["id"] == id, get_json_db()))
+        recepie_row = recepie_row[0] if recepie_row else None
+    elif DB_DRIVER == "SQLITE":
+        recepie_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
     if recepie_row is None: return page("Rezept nicht gefunden :(")
     recepie = dict(recepie_row)
     template = jinja2.Environment().from_string(page(recepie_page))
