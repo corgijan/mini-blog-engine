@@ -45,29 +45,29 @@ footer = """
                """
 main_page = """
                 <script>
-                function filterRecepies() {
-                    let filter = document.getElementById('recepiesFilter').value.toUpperCase();
-                    for (let li of document.getElementById('recepiesList').getElementsByTagName('li')) {
+                function filterrecipes() {
+                    let filter = document.getElementById('recipesFilter').value.toUpperCase();
+                    for (let li of document.getElementById('recipesList').getElementsByTagName('li')) {
                         let a = li.getElementsByTagName('a')[0];
                         let txtValue = a.textContent || a.innerText;
                         li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
                     }
                 }
-                function sortRecepies() {
-                    let list = document.getElementById('recepiesList')
+                function sortrecipes() {
+                    let list = document.getElementById('recipesList')
                     Array.from(list.getElementsByTagName('li'))
                         .sort((a, b) => (sortSelector.value === 'asc' ? 1 : -1) * (a.innerText).localeCompare(b.innerText))
                         .forEach(item => list.appendChild(item));
                 }
                 </script>
-                <p>Hello at Bäckerone,<br> your responsible disclosure service for recepies!</p>
+                <p>Hello at Bäckerone,<br> your responsible disclosure service for recipes!</p>
                 REZEPTE: <br>
-                <input type="text" id="recepiesFilter" onkeyup="filterRecepies()" placeholder="Suche nach Rezepten,Tags..">
-                {% if recepies_count >= 50 %}
-                <select id="sortSelector" onchange="sortRecepies()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+                <input type="text" id="recipesFilter" onkeyup="filterrecipes()" placeholder="Suche nach Rezepten,Tags..">
+                {% if recipes_count >= 50 %}
+                <select id="sortSelector" onchange="sortrecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
                 {% endif %}
-                <ul id="recepiesList">
-                    {% for r in recepies%}
+                <ul id="recipesList">
+                    {% for r in recipes%}
                     <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                 </ul>
@@ -93,8 +93,8 @@ edit_page = """
                 </form>
                 <br>
                 """
-recepie_page = """
-                <p>Hello at Bäckerone, your responsible disclosure service for recepies!</p>
+recipe_page = """
+                <p>Hello at Bäckerone, your responsible disclosure service for recipes!</p>
                 <h1>{{r.title|e}}</h1>
                 {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
                 <h3>Tags: {{r.tags|e}}</h3>
@@ -118,10 +118,10 @@ def get_sqlite_db():
 def get_json_db():
     try:
         with open('data.json') as db_file:
-            db_recepies = json.load(db_file)
+            db_recipes = json.load(db_file)
     except Exception:
-        db_recepies = {}
-    return [{"id": id, **recepie} for id, recepie in db_recepies.items()]
+        db_recipes = {}
+    return [{"id": id, **recipe} for id, recipe in db_recipes.items()]
 
 @app.teardown_appcontext
 def teardown_db(exception):
@@ -131,7 +131,7 @@ def teardown_db(exception):
 @app.route("/", methods=["GET", "POST"])
 def main():
     if request.method == "POST":
-        if request.form["pass"] == (os.environ.get("RECEPIE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
+        if request.form["pass"] == (os.environ.get("RECIPE_PASSPHRASE") or "ichessegernekuchen") or 'authenticated' in session:
             session['authenticated'] = True
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
             if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page("TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
@@ -141,16 +141,16 @@ def main():
                 request.files['image'].save(os.path.join('static', id))
             if DB_DRIVER == "JSON":
                 with open('data.json', 'r+') as db_file:
-                    try: recepies = json.load(db_file)
-                    except Exception: recepies = {}
+                    try: recipes = json.load(db_file)
+                    except Exception: recipes = {}
                     if request.form["del-title"] != "":
-                        if id in recepies: del recepies[id]
+                        if id in recipes: del recipes[id]
                         if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
                     else:
-                        recepies[id] = dict(title=request.form["title"][0:3000], ingredients=request.form["ingredients"][0:3000], prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000], cvss=0.0)
+                        recipes[id] = dict(title=request.form["title"][0:3000], ingredients=request.form["ingredients"][0:3000], prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000], cvss=0.0)
                     db_file.seek(0)
                     db_file.truncate()
-                    json.dump(recepies, db_file, indent=4)
+                    json.dump(recipes, db_file, indent=4)
             elif DB_DRIVER == "SQLITE":
                 conn = get_sqlite_db()
                 if request.form["del-title"] != "":
@@ -165,36 +165,36 @@ def main():
         else:
             return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
     if DB_DRIVER == "JSON":
-        recepies = get_json_db()
+        recipes = get_json_db()
     elif DB_DRIVER == "SQLITE":
-        recepie_rows = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
-        recepies = [dict(row) for row in recepie_rows]
+        recipe_rows = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
+        recipes = [dict(row) for row in recipe_rows]
     template = jinja2.Environment().from_string(page(main_page))
-    return template.render(recepies=recepies, recepies_count=len(recepies))
+    return template.render(recipes=recipes, recipes_count=len(recipes))
 
 @app.route("/e/<id>")
 def rezepte_edit(id):
     if id!="new":
         if DB_DRIVER == "JSON":
-            recepie_row = list(filter(lambda r: r["id"] == id, get_json_db()))
-            recepie_row = recepie_row[0] if recepie_row else None
+            recipe_row = list(filter(lambda r: r["id"] == id, get_json_db()))
+            recipe_row = recipe_row[0] if recipe_row else None
         elif DB_DRIVER == "SQLITE":
-            recepie_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
-        if recepie_row is None: return page("Rezept nicht gefunden :(")
-        recepie = dict(recepie_row)
+            recipe_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+        if recipe_row is None: return page("Rezept nicht gefunden :(")
+        recipe = dict(recipe_row)
     else:
-        recepie = dict(title="",tags="",prep="",ingredients="",id="")
+        recipe = dict(title="",tags="",prep="",ingredients="",id="")
     template = jinja2.Environment().from_string(page(edit_page))
-    return make_response( template.render(r=recepie, authenticated=('authenticated' in session), img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id']))))
+    return make_response( template.render(r=recipe, authenticated=('authenticated' in session), img_url=url_for('static', filename=recipe['id']), has_image=os.path.isfile(os.path.join('static', recipe['id']))))
 
 @app.route("/r/<id>")
 def rezepte_show(id):
     if DB_DRIVER == "JSON":
-        recepie_row = list(filter(lambda r: r["id"] == id, get_json_db()))
-        recepie_row = recepie_row[0] if recepie_row else None
+        recipe_row = list(filter(lambda r: r["id"] == id, get_json_db()))
+        recipe_row = recipe_row[0] if recipe_row else None
     elif DB_DRIVER == "SQLITE":
-        recepie_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
-    if recepie_row is None: return page("Rezept nicht gefunden :(")
-    recepie = dict(recepie_row)
-    template = jinja2.Environment().from_string(page(recepie_page))
-    return template.render(r=recepie, img_url=url_for('static', filename=recepie['id']), has_image=os.path.isfile(os.path.join('static', recepie['id'])))
+        recipe_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+    if recipe_row is None: return page("Rezept nicht gefunden :(")
+    recipe = dict(recipe_row)
+    template = jinja2.Environment().from_string(page(recipe_page))
+    return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']), has_image=os.path.isfile(os.path.join('static', recipe['id'])))
