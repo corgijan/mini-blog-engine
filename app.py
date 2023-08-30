@@ -175,13 +175,8 @@ def main():
 @app.route("/e/<id>")
 def rezepte_edit(id):
     if id!="new":
-        if DB_DRIVER == "JSON":
-            recipe_row = list(filter(lambda r: r["id"] == id, get_json_db()))
-            recipe_row = recipe_row[0] if recipe_row else None
-        elif DB_DRIVER == "SQLITE":
-            recipe_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
-        if recipe_row is None: return page("Rezept nicht gefunden :(")
-        recipe = dict(recipe_row)
+        recipe = get_rezept(id)
+        if recipe is None: return page("Rezept nicht gefunden :(")
     else:
         recipe = dict(title="",tags="",prep="",ingredients="",id="")
     template = jinja2.Environment().from_string(page(edit_page))
@@ -189,12 +184,15 @@ def rezepte_edit(id):
 
 @app.route("/r/<id>")
 def rezepte_show(id):
+    recipe = get_rezept(id)
+    if recipe is None: return page("Rezept nicht gefunden :(")
+    template = jinja2.Environment().from_string(page(recipe_page))
+    return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']), has_image=os.path.isfile(os.path.join('static', recipe['id'])))
+
+def get_rezept(id):
     if DB_DRIVER == "JSON":
         recipe_row = list(filter(lambda r: r["id"] == id, get_json_db()))
         recipe_row = recipe_row[0] if recipe_row else None
     elif DB_DRIVER == "SQLITE":
         recipe_row = get_sqlite_db().cursor().execute("SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
-    if recipe_row is None: return page("Rezept nicht gefunden :(")
-    recipe = dict(recipe_row)
-    template = jinja2.Environment().from_string(page(recipe_page))
-    return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']), has_image=os.path.isfile(os.path.join('static', recipe['id'])))
+    return dict(recipe_row) if recipe_row is not None else None
