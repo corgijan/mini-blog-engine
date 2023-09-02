@@ -5,7 +5,8 @@ Bäckerone was created while cycling with my friends with the idea to take the c
 
 > This Project aims to have as little LOC as possible and to be in the style of a 90s blogs.
 
-<img src="https://github.com/Iamjava/baeckerone/assets/70795482/56118b57-0fae-4355-9f54-8d09cce73d98" alt="drawing" width="400"/><img>
+<img src="https://github.com/Iamjava/baeckerone/assets/70795482/94350533-6114-4e4e-a115-cd53038aab37"  width="400"/>
+
 
 ```
 1. create data.json and set the driver to "JSON" or leave it as it is and use sqlite
