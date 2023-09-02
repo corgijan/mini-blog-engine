@@ -1,6 +1,0 @@
-1. create data.txt
-2. install deps (poetry install)
-3. set passphrase via env var: RECEPIE_PASSPHRASE default: ichessegernekuchen
-4. start server (poetry run python -m flask run)
-
-
