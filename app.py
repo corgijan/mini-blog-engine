@@ -40,7 +40,7 @@ header = """
                 .norm{ background: #264653; border: 0px; text-decoration: underline; }
                 </style>
                 <main>
-                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('Jan.vaorin(at)gmail(punkt)com All Cookies are functional ones')">IMPRESSUM</button></div>
+                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('jan.vaorin(at)gmail(dot)com All Cookies are functional ones v.1.0.1')">IMPRESSUM</button></div>
                 """
 footer = """
                 </main>
@@ -95,6 +95,7 @@ edit_page = """
                     <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Löschen</button>
                 </div>
                 </form>
+                *all recipes are released in the public domain and can be used freely 
                 <br>
                 """
 recipe_page = """
