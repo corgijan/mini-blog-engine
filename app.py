@@ -42,6 +42,7 @@ header = """
                 <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('Jan.vaorin(at)gmail(punkt)de All Cookies are functional ones')">IMPRESSUM</button></div>
                 """
 footer = """
+                <script>function updCVSS() { const cvss = document.getElementById('cvss'); cvss ? cvss.style.color = ['#51CC1C', '#E9C46A', '#E03333'][Math.floor((parseFloat(cvss.textContent)/4))] : null; } updCVSS();</script>
                 </main>
                 </body>
                 </html>
@@ -80,6 +81,7 @@ edit_page = """
                 Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
                 Titel:<br> <input name="title" value="{{r.title|e}}" /><br>
                 Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
+                CVSS-Score: <span id="cvss">{{r.cvss|e}}</span><br> <input type="range" name="cvss" min="0" max="10" step="0.1" value="{{r.cvss|e}}" oninput="document.getElementById('cvss').textContent = this.value; updCVSS()"><br>
                 Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
                 Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br>
                 <br>
@@ -102,6 +104,7 @@ recepie_page = """
                 <h1>{{r.title|e}}</h1>
                 {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
                 <h3>Tags: {{r.tags|e}}</h3>
+                <h3>CVSS-Score: <span id="cvss">{{r.cvss|e}}</span></h3>
                 <h3 style="text-decoration: underline;"> Zutaten: </h3>
                 <h4><p class="pre">{{r.ingredients|e}}</p></h4>
                 <h3 style="text-decoration: underline;"> Zubereitung: </h3>
