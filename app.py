@@ -6,7 +6,7 @@ app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 DB_DRIVER = "SQLITE"  # JSON or SQLITE
-DATAFILE = "data.json"
+DATAFILE = "data.db"
 PASSPHRASE = os.environ.get("RECIPE_PASSPHRASE") or "ichessegernekuchen"
 
 header = """
