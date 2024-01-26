@@ -13,7 +13,7 @@ header = """
                 <!DOCTYPE html>
                 <html>
                 <head>
-                <title>Bäcker One</title>
+                <title>CZI Quotes</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 </head>
                 <body>
@@ -21,7 +21,6 @@ header = """
                 * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
                 body{ background: #264653; }
                 .add { color: #E9C46A !important; }
-                img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
                 a:visited, .home { color: #F4A261; }
                 textarea, input {
@@ -64,25 +63,23 @@ main_page = """
                         .forEach(item => list.appendChild(item));
                 }
                 </script>
-                <p>Hello at Bäckerone,<br> your responsible disclosure service for recipes!</p>
-                REZEPTE: <br>
+                <p>Hello at CZI Quotes,<br> your responsible disclosure service for quotes from the CZI</p>
+                Quotes: <br>
                 <input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
                 {% if recipes_count >= 50 %}
                 <select id="sortSelector" onchange="sortRecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
                 {% endif %}
                 <ul id="recipesList">
                     {% for r in recipes%}
-                    <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
+                        <li><h2>{{ r.title|e}}</h2><br>{{r.text}}</li>
                     {% endfor %}
                 </ul>
                 """
 edit_page = """
-                <form method="post" enctype="multipart/form-data" action="/">
-                Bild:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
+                <form method="post"  action="/">
                 Titel:<br> <input name="title" value="{{r.title|e}}" /><br>
-                Tags (Kommaseparierte Liste):<br> <input name="tags" value="{{r.tags|e}}"/><br>
-                Zutaten:<br> <textarea name="ingredients" rows="5" cols="33">{{r.ingredients|e}}</textarea><br>
-                Zubereitung:<br> <textarea name="prep" rows="5" cols="33">{{r.prep|e}}</textarea><br><br>
+                Author:<br> <input name="author" value="{{r.author|e}}" /><br>
+                Text:<br> <textarea name="text" rows="5" cols="33">{{r.text|e}}</textarea><br><br>
                 {% if authenticated %}
                     <input name="pass" value="" type="hidden"/><br>
                 {% else %}
@@ -99,10 +96,10 @@ edit_page = """
                 <br>
                 """
 recipe_page = """
-                <p>Hello at Bäckerone, your responsible disclosure service for recipes!</p>
+                <p>Hello at CZI-Quotes</p> 
                 <h1>{{r.title|e}}</h1>
-                {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
-                <h3>Tags: {{r.tags|e}}</h3>
+                <h1>{{r.text|e}}</h1>
+                <h1>--{{r.author|e}}</h1>
                 <h3 style="text-decoration: underline;"> Zutaten: </h3>
                 <h4><p class="pre">{{r.ingredients|e}}</p></h4>
                 <h3 style="text-decoration: underline;"> Zubereitung: </h3>
@@ -120,7 +117,7 @@ def get_sqlite_db():
         g.db = sqlite3.connect('data.db')
         g.db.row_factory = sqlite3.Row
         g.db.execute(
-            "CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)")
+            "CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, text text NOT NULL, author text NOT NULL, created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP)")
     return g.db
 
 
@@ -145,13 +142,8 @@ def main():
         if request.form["pass"] == PASSPHRASE or 'authenticated' in session:
             session['authenticated'] = True
             if request.form["title"] == "": return page("Bitte wenigstens einen Titel eingeben")
-            if request.form["del-title"] != "" and request.form["del-title"] != request.form["title"]: return page(
-                "TITEL NICHT KORREKT, Rezept wird nicht gelöscht")
+            if request.form["text"] == "": return page("Bitte wenigstens einen text eingeben")
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
-            if 'image' in request.files and request.files['image'].mimetype in {'image/webp', 'image/jpeg',
-                                                                                'image/png'}:
-                if not os.path.exists('static'): os.makedirs('static')
-                request.files['image'].save(os.path.join('static', id))
             if DB_DRIVER == "JSON":
                 with open(DATAFILE, 'r+') as db_file:
                     try:
@@ -162,10 +154,12 @@ def main():
                         if id in recipes: del recipes[id]
                         if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
                     else:
-                        recipes[id] = dict(title=request.form["title"][0:3000],
-                                           ingredients=request.form["ingredients"][0:3000],
-                                           prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
-                                           cvss=0.0)
+                        recipes[id] = dict(
+                            title=request.form["title"][0:3000],
+                            text=request.form["text"][0:3000],
+                            author=request.form["author"][0:3000],
+                            id=id
+                        )
                     db_file.seek(0)
                     db_file.truncate()
                     json.dump(recipes, db_file, indent=4)
@@ -175,20 +169,19 @@ def main():
                     conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
                     if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
                 else:
-                    conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (
-                    id, request.form["title"][0:3000], request.form["ingredients"][0:3000],
-                    request.form["prep"][0:3000], request.form["tags"][0:3000], request.form.get('cvss', 0.0)))
+                    conn.cursor().execute("INSERT OR REPLACE INTO recipes (id,text,title,author) VALUES (?, ?, ?, ?)", (
+                    id, request.form["title"][0:3000], request.form["text"][0:3000],request.form["author"][0:3000]))
                 conn.commit()
             template = jinja2.Environment().from_string(page(edit_page))
             if request.form["del-title"] == request.form["title"]: return make_response(redirect("/"))
-            return make_response(redirect("/r/" + id))
+            return make_response(redirect("/"))
         else:
-            return page("FALSCHE PASSPHRASE, Rezept nicht angelegt / editiert / gelöscht")
+            return page("FALSCHE PASSPHRASE, Kein Zugriff")
     if DB_DRIVER == "JSON":
         recipes = get_json_db()
     elif DB_DRIVER == "SQLITE":
         recipe_rows = get_sqlite_db().cursor().execute(
-            "SELECT title, ingredients, prep, tags, id, cvss FROM recipes ORDER BY title ASC").fetchall()
+            "SELECT title,author,text,created_at FROM recipes ORDER BY title ASC").fetchall()
         recipes = [dict(row) for row in recipe_rows]
     template = jinja2.Environment().from_string(page(main_page))
     return template.render(recipes=recipes, recipes_count=len(recipes))
@@ -200,7 +193,7 @@ def rezepte_edit(id):
         recipe = get_rezept(id)
         if recipe is None: return page("Rezept nicht gefunden :(")
     else:
-        recipe = dict(title="", tags="", prep="", ingredients="", id="")
+        recipe = dict(title="", text="", author="", id="")
     template = jinja2.Environment().from_string(page(edit_page))
     return make_response(template.render(r=recipe, authenticated=('authenticated' in session),
                                          img_url=url_for('static', filename=recipe['id']),
@@ -210,6 +203,7 @@ def rezepte_edit(id):
 @app.route("/r/<id>")
 def rezepte_show(id):
     recipe = get_rezept(id)
+    print(recipe)
     if recipe is None: return page("Rezept nicht gefunden :(")
     template = jinja2.Environment().from_string(page(recipe_page))
     return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']),
@@ -222,5 +216,5 @@ def get_rezept(id):
         recipe_row = recipe_row[0] if recipe_row else None
     elif DB_DRIVER == "SQLITE":
         recipe_row = get_sqlite_db().cursor().execute(
-            "SELECT title, ingredients, prep, tags, id, cvss FROM recipes WHERE id = ?", (id,)).fetchone()
+            "SELECT title,text,author  FROM recipes WHERE id = ?", (id,)).fetchone()
     return dict(recipe_row) if recipe_row is not None else None
