@@ -19,7 +19,7 @@ header = """
                 <body>
                 <style>
                 * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
-                body{ background: #264653; }
+                body{ background: #264653;margin:0; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
