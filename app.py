@@ -28,7 +28,7 @@ header = """
                     background: #2A9D8F;
                     border: 3px solid #264653;
                 }
-                main { padding: 40px; max-width: 800px; height:100vh }
+                main { padding: 40px; max-width: 800px; min-height:100vh }
                 img {max-width:300px;max-height:300px;}
                 details{
                     padding:40px 0 40px 0;
