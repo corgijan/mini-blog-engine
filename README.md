@@ -1,5 +1,5 @@
 # Bäckerone
-<a href="http://rezepte.corgi.pink">[open]</a>
+<a href="https://rezepte.corgijan.dev/">[open]</a>
 Bäckerone was created while cycling with my friends with the idea to take the concept of hackerone (responsible disclosure) and use it for recipes.
 
 > Honestly, I just wanted to publish my recipes in the easiest possible way and I like the 90s style of blogging. 
