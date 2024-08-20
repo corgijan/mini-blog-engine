@@ -19,7 +19,7 @@ header = """
                 <body>
                 <style>
                 * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
-                body{ background: #264653;margin:0; }
+                body{ background: #264653;margin:0;min-height: 100vh; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
@@ -28,7 +28,7 @@ header = """
                     background: #2A9D8F;
                     border: 3px solid #264653;
                 }
-                main { padding: 40px; max-width: 600px; min-height:100vh;margin:auto; }
+                main { padding: 40px; max-width: 600px; margin:auto; }
                 img {max-width:300px;max-height:300px;}
                 details{
                     padding:40px 0 40px 0;
