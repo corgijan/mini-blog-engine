@@ -7,32 +7,32 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 DB_DRIVER = "SQLITE"  # JSON or SQLITE
 DATAFILE = "data.db"
-PASSPHRASE = os.environ.get("RECIPE_PASSPHRASE") or "ichessegernekuchen"
+PASSPHRASE = os.environ.get("RECIPE_PASSPHRASE") or "ichtrinkegernewein"
 
 header = """
                 <!DOCTYPE html>
                 <html>
                 <head>
-                <title>Bäcker One</title>
+                <title>Genussecke Corgijan</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 </head>
                 <body>
                 <style>
-                * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
-                body{ background: #264653;margin:0; }
+                * { font-size: 20px; color: whitesmoke; font-family: "Georgia" }
+                body{ background: lightcoral; margin:0; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
                 a:visited, .home { color: #F4A261; }
                 textarea, input {
-                    background: #2A9D8F;
+                    background: lightcoral;
                     border: 3px solid #264653;
                 }
                 main { padding: 40px; max-width: 800px; min-height:100vh }
                 img {max-width:300px;max-height:300px;}
                 details{
                     padding:40px 0 40px 0;
-                    background: #2A9D8F;
+                    background: lightcoral;
                     width: 500px;
                     border-radius: 15px;
                 }
