@@ -1,10 +1,10 @@
 # Bäckerone
-<a href="http://rezepte.corgi.pink">[open]</a>
+<a href="https://rezepte.corgijan.dev/">[open]</a>
 Bäckerone was created while cycling with my friends with the idea to take the concept of hackerone (responsible disclosure) and use it for recipes.
 
-> Honestly, I just wanted to publish my recipes in the easiest possible way and I like the 90s style of blogging. 
+> Honestly, I just wanted to publish my recipes in the easiest way possible and I like the 90s style of blogging. 
 
-> This Project aims to have as little LOC as possible and to be in the style of a 90s blogs.
+> This Project aims to have as little LOC as possible
 
 <img src="https://github.com/Iamjava/baeckerone/assets/70795482/94350533-6114-4e4e-a115-cd53038aab37"  width="400"/>
 

@@ -18,8 +18,8 @@ header = """
                 </head>
                 <body>
                 <style>
-                * { font-size: 20px; color: whitesmoke; font-family: "Georgia" }
-                body{ background: lightcoral; margin:0; }
+                * { font-size: 20px; color: whitesmoke;font-family: "Georgia" }
+                body{ background: #264653;margin:0;min-height: 100vh; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
@@ -28,7 +28,7 @@ header = """
                     background: lightcoral;
                     border: 3px solid #264653;
                 }
-                main { padding: 40px; max-width: 800px; min-height:100vh }
+                main { padding: 40px; max-width: 600px; margin:auto; }
                 img {max-width:300px;max-height:300px;}
                 details{
                     padding:40px 0 40px 0;
@@ -38,6 +38,7 @@ header = """
                 }
                 .pre{ white-space: pre-wrap; }
                 .norm{ background: #264653; border: 0px; text-decoration: underline; }
+                
                 </style>
                 <main>
                 <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('jan.vaorin(at)gmail(dot)com All Cookies are functional ones v.1.0.1')">IMPRESSUM</button></div>
