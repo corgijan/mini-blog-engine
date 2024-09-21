@@ -29,7 +29,7 @@ header = """
                     background: #2A9D8F;
                     border: 3px solid #264653;
                 }
-                main { padding: 40px; max-width: 600px; margin:auto; }
+                main { padding: 20px; max-width: 600px; margin:auto; }
                 img {max-width:300px;max-height:300px;}
                 details{
                     padding:40px 0 40px 0;
@@ -83,7 +83,7 @@ header = """
 </div>
 </header>
 -->
-                <main style="margin-top:100px">
+                <main style="padding-top:100px">
                 <nav style="font-size: 1rem" class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🦊 corgijans Rezepte</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
