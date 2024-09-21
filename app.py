@@ -19,7 +19,7 @@ header = """
                 </head>
                 <body>
                 <style>
-                * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
+                * { font-size: 20px; color: #E9C46A; font-family: "Helvetica", sans-serif; }
                 body{ background: #264653;margin:0; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
@@ -39,11 +39,52 @@ header = """
                 }
                 .pre{ white-space: pre-wrap; }
                 .norm{ background: #264653; border: 0px; text-decoration: underline; }
+                .nav-link{ font-size:1rem; }
                 
                 </style>
-                
+ <!--               
+<header class="header-section has-img">
+
+<div class="big-img intro-header" style="background-image: url(&quot;https://images.unsplash.com/photo-1712741042337-124ff2469441?q=80&amp;w=1974&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&quot;);">
+  <div class="container-md">
+    <div class="row">
+      <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+        <div class="page-heading">
+          <h1>Projects</h1>
+          
+            
+              <hr class="small">
+              <span class="page-subheading">Why you'd want to go on a date with me</span>
+            
+          
+
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="img-desc" style="display: none;"></span>
+</div>
+
+<div class="intro-header no-img">
+  <div class="container-md">
+    <div class="row">
+      <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+        <div class="page-heading">
+          <h1>Projects</h1>
+          
+            
+              <hr class="small">
+              <span class="page-subheading">Why you'd want to go on a date with me</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+-->
                 <main style="margin-top:100px">
-                <nav class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🦊 corgijans Rezepte</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <nav style="font-size: 1rem" class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🦊 corgijans Rezepte</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -68,8 +109,9 @@ header = """
       </div>
     </div>
   
-
 </nav>
+
+
                 """
 footer = """
                 <script src="/static/script.js"></script>
@@ -129,7 +171,6 @@ edit_page = """
                 <br>
                 """
 recipe_page = """
-                <p>Hello at Bäckerone, your responsible disclosure service for recipes!</p>
                 <h1>{{r.title|e}}</h1>
                 {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
                 <h3>Tags: {{r.tags|e}}</h3>
