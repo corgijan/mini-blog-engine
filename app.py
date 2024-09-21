@@ -15,11 +15,12 @@ header = """
                 <head>
                 <title>Bäcker One</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" href="/static/style.css">
                 </head>
                 <body>
                 <style>
                 * { font-size: 20px; color: #E9C46A; font-family: "Georgia" }
-                body{ background: #264653;margin:0;min-height: 100vh; }
+                body{ background: #264653;margin:0; }
                 .add { color: #E9C46A !important; }
                 img { width: 100%; height: auto; }
                 a { color: #E9C46A; }
@@ -40,8 +41,35 @@ header = """
                 .norm{ background: #264653; border: 0px; text-decoration: underline; }
                 
                 </style>
-                <main>
-                <div><a class="home" href="/">HOME</a> <a class="add" href="/e/new">HINZUFÜGEN</a> <button class="add norm" onclick="alert('jan.vaorin(at)gmail(dot)com All Cookies are functional ones v.1.0.1')">IMPRESSUM</button></div>
+                
+                <main style="margin-top:100px">
+                <nav class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🦊 corgijans Rezepte</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/e/new">hinzufügen</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://blog.corgijan.dev">blog</a>
+          </li>
+          </ul>
+  </div>
+    <div class="avatar-container">
+      <div class="avatar-img-border">
+        <a href="/">
+          <img alt="Navigation bar avatar" class="avatar-img" src="http://blog.corgijan.dev/assets/images/ava.jpg">
+        </a>
+      </div>
+    </div>
+  
+
+</nav>
                 """
 footer = """
                 </main>
@@ -65,7 +93,7 @@ main_page = """
                         .forEach(item => list.appendChild(item));
                 }
                 </script>
-                <p>Hello at Bäckerone,<br> your responsible disclosure service for recipes!</p>
+                <p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code</p>
                 REZEPTE: <br>
                 <input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
                 {% if recipes_count >= 50 %}
