@@ -72,6 +72,7 @@ header = """
 </nav>
                 """
 footer = """
+                <script src="/static/script.js"></script>
                 </main>
                 </body>
                 </html>
