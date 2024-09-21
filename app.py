@@ -13,7 +13,7 @@ header = """
                 <!DOCTYPE html>
                 <html>
                 <head>
-                <title>Bäcker One</title>
+                <title>Corgijans Rezepte</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <link rel="stylesheet" href="/static/style.css">
                 </head>
