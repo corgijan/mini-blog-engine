@@ -287,6 +287,8 @@ class Wine(EntityDefinition):
     def sql_create_table_string():
         return "CREATE TABLE IF NOT EXISTS wines (id text PRIMARY KEY, title text NOT NULL, wine_info text, taste_info text, tags text, cvss real)"
 
+
+
 Entities = [
     Grape,
     Regions,
@@ -403,9 +405,9 @@ def rezepte_show(id):
         if recipe is None: return page("nicht gefunden :(")
         template = jinja2.Environment().from_string(page(recipe_page))
         return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']),
-                               has_image=os.path.isfile(os.path.join('static', recipe['id'])))
+                               has_image=os.path.isfile(os.path.join('static', recipe['id'])),title="Grapes")
 
-@app.route("/regions")
+@app.route("/regions", methods=["GET", "POST"])
 def regions():
     if request.method == "POST":
         if request.form["pass"] == PASSPHRASE or 'authenticated' in session:
@@ -460,6 +462,13 @@ def regions():
     template = jinja2.Environment().from_string(page(main_page))
     return template.render(recipes=recipes, recipes_count=len(recipes), title="Regions")
 
+@app.route("/regions/<id>")
+def regions_show(id):
+    recipe = Regions.find(id)
+    if recipe is None: return page("nicht gefunden :(")
+    template = jinja2.Environment().from_string(page(recipe_page))
+    return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']),
+                           has_image=os.path.isfile(os.path.join('static', recipe['id'])),title="Regions")
 @app.route("/edit_regions/<id>")
 def regions_edit(id):
     if id != "new":
@@ -467,10 +476,11 @@ def regions_edit(id):
         if recipe is None: return page("Nicht gefunden :(")
     else:
         recipe = dict(title="", tags="", taste_info="", region_info="", id="")
-    template = jinja2.Environment().from_string(page(edit_page))
+    template = jinja2.Environment().from_string(page(edit_page_region))
     return make_response(template.render(r=recipe, authenticated=('authenticated' in session),
                                          img_url=url_for('static', filename=recipe['id']),
-                                         has_image=os.path.isfile(os.path.join('static', recipe['id']))))
+                                         has_image=os.path.isfile(os.path.join('static', recipe['id']))
+                                         ,title="Regions"))
 
 
 @app.route("/wines")

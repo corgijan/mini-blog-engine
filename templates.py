@@ -4,6 +4,7 @@ header = """
                 <head>
                 <title>Rebenberg Corgijan</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" href="/static/style.css">
                 </head>
                 <body>
                 <style>
@@ -33,7 +34,7 @@ header = """
                   list-style-type: none;
                   margin: 0;
                   padding: 0;
-                  overflow: hidden;
+                  overflow: visible;
                   background-color: #333;
                 }
 
@@ -58,19 +59,47 @@ header = """
                 .navbar {
                   position: sticky;
                   top: 0;
-                  overflow: hidden;
+                  overflow: visible;
                   background-color: #333;
                 }
                 
                 </style>
+                
+                <nav class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🍷 Rebenberg</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-                <ul class="ul navbar" >
-                  <li class="li"><a class="active" href="/"><b>REBENBERG</b></a></li>
-                  <li class="li"><a href="/grapes">Grapes</a></li>
-                  <li class="li"><a href="/regios">Regions</a></li>
-                  <li class="li"><a href="/wines">Wines</a></li>
-                  <li class="li" style="float: right; padding-right: 10px"><a href="https://blog.corgijan.dev/aboutme">Contact</a></li>
-                </ul>
+  <div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/grapes">Grapes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/regions">Regions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.corgijan.dev">About Me</a>
+          </li></ul>
+  </div>
+
+  
+
+  
+    <div class="avatar-container">
+      <div class="avatar-img-border">
+        <a href="/">
+          <img alt="Navigation bar avatar" class="avatar-img" src="http://blog.corgijan.dev/assets/images/ava.jpg">
+        </a>
+      </div>
+    </div>
+  
+
+</nav>
+                
+
                 <main>
 
                 <div>
@@ -105,13 +134,14 @@ main_page = """
                 {% endif %}
                 <ul id="recipesList">
                     {% for r in recipes%}
-                    <li><h2><a href="/grapes/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
+                    <li><h2><a href="/{{title | lower}}/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
                     {% endfor %}
                     
                     <li><h2><a href="/edit_{{title | lower}}/new"> + </a></h2></li>
                 </ul>
                 """
 edit_page = """
+                <h1>Edit Grape</h1>
                 <form method="post" enctype="multipart/form-data" action="/grapes">
                 Image:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
                 Title:<br> <input name="title" value="{{r.title|e}}" /><br>
@@ -135,14 +165,41 @@ edit_page = """
                 *all info are released in the public domain and can be used freely 
                 <br>
                 """
+
+edit_page_region = """
+                <p>Edit Region</p>
+                <form method="post" enctype="multipart/form-data" action="/{{title|lower}}">
+                Image:<br>{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}<input type="file" name="image" accept="image/webp, image/jpeg, image/png" /><br>
+                Title:<br> <input name="title" value="{{r.title|e}}" /><br>
+                Tags (commaseparated list):<br> <input name="tags" value="{{r.tags|e}}"/><br>
+                Region Info:<br> <textarea name="region_info" rows="5" cols="33">{{r.regio_info|e}}</textarea><br>
+                Region Grapes:<br> <textarea name="taste_info" rows="5" cols="33">{{r.taste_info|e}}</textarea><br><br>
+                {% if authenticated %}
+                    <input name="pass" value="" type="hidden"/><br>
+                {% else %}
+                    Passphrase:<br> <input name="pass"/><br>
+                {%endif%}
+                <input type="hidden" name="id" value="{{r.id|e}}"/><br>
+                <div class="del" style="display:none">To delete, please enter Title:<br><input id="del-title" name="del-title" value="" onkeyup="document.getElementById('del-submit').innerHTML = document.getElementById('del-title').value!='' ? 'Löschen' : 'Abschicken'"/></div><br>
+                <div style="display:flex; gap:10px;">
+                    <button  id="del-submit" type="submit">Submit</button>
+                    <button class="del" type="button" onclick="for (let e of document.getElementsByClassName('del')) {e.style.display = e.style.display=='none' ? 'block' : 'none'}">Delete</button>
+                </div>
+                </form>
+                <br>
+                <br>
+                *all info are released in the public domain and can be used freely 
+                <br>
+                """
+
 recipe_page = """
                 <p></p>
                 <h1>{{r.title|e}}</h1>
                 {% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
                 <h3>Tags: {{r.tags|e}}</h3>
-                <h3 style="text-decoration: underline;"> Zutaten: </h3>
+                <h3 style="text-decoration: underline;">  </h3>
                 <h4><p class="pre">{{r.grape_info|e}}</p></h4>
-                <h3 style="text-decoration: underline;"> Zubereitung: </h3>
+                <h3 style="text-decoration: underline;">  </h3>
                 <h4><p class="pre">{{r.taste_info|e}}</p></h4>
-                <a href="/edit_grape/{{r.id}}">Editieren</a>
+                <a href="/edit_{{title|lower}}/{{r.id}}">Editieren</a>
                 """
