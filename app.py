@@ -136,7 +136,7 @@ main_page = """
                         .forEach(item => list.appendChild(item));
                 }
                 </script>
-                <p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code</p>
+                <p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code und <br> dem look eines Blogs von 1999</p>
                 REZEPTE: <br>
                 <input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
                 {% if recipes_count >= 50 %}
