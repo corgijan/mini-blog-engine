@@ -16,4 +16,3 @@ Bäckerone was created while cycling with my friends with the idea to take the c
 4. start server (poetry run python -m flask run)
 ```
 
-

@@ -5,8 +5,8 @@ app = Flask(__name__)
 app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
-DB_DRIVER = "SQLITE"  # JSON or SQLITE
-DATAFILE = "data.db"
+DB_DRIVER = "JSON"  # JSON or SQLITE
+DATAFILE = "data/data.json"
 PASSPHRASE = os.environ.get("RECIPE_PASSPHRASE") or "ichessegernekuchen"
 
 header = """
