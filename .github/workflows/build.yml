@@ -3,7 +3,7 @@ name: Build and Publish Docker Image
 on:
   workflow_dispatch:
     inputs:
-      image_name:
+      imagename:
         description: 'Jans Rezepte'
         required: true
         default: 'rezepte'
@@ -29,9 +29,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t $INPUT_IMAGE_NAME:latest .
-          docker tag $INPUT_IMAGE_NAME:latest ${{ secrets.DOCKER_HUB_USERNAME }}/$INPUT_IMAGE_NAME:latest
+          docker build -t $INPUT_IMAGE_NAME:latest -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.imagename }}:latest .
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$INPUT_IMAGE_NAME:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.imagename }}:latest
