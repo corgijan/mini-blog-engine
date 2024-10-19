@@ -1,12 +1,13 @@
 from flask import Flask, redirect, make_response, request, session, g, url_for
 import jinja2, uuid, os, sqlite3, json
+import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(64)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 DB_DRIVER = "JSON"  # JSON or SQLITE
-DATAFILE = "data/data.json"
+DATAFILE = os.environ.get("DATA_PATH") or "data/data.json"
 PASSPHRASE = os.environ.get("RECIPE_PASSPHRASE") or "ichessegernekuchen"
 
 header = """
@@ -224,22 +225,25 @@ def main():
                 if not os.path.exists('static'): os.makedirs('static')
                 request.files['image'].save(os.path.join('static', id))
             if DB_DRIVER == "JSON":
-                with open(DATAFILE, 'r+') as db_file:
-                    try:
-                        recipes = json.load(db_file)
-                    except Exception:
-                        recipes = {}
-                    if request.form["del-title"] != "":
-                        if id in recipes: del recipes[id]
-                        if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
-                    else:
-                        recipes[id] = dict(title=request.form["title"][0:3000],
-                                           ingredients=request.form["ingredients"][0:3000],
-                                           prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
-                                           cvss=0.0)
-                    db_file.seek(0)
-                    db_file.truncate()
-                    json.dump(recipes, db_file, indent=4)
+                try:
+                    with open(DATAFILE, 'r+') as db_file:
+                        try:
+                            recipes = json.load(db_file)
+                        except Exception:
+                            recipes = {}
+                        if request.form["del-title"] != "":
+                            if id in recipes: del recipes[id]
+                            if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                        else:
+                            recipes[id] = dict(title=request.form["title"][0:3000],
+                                               ingredients=request.form["ingredients"][0:3000],
+                                               prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
+                                               cvss=0.0)
+                        db_file.seek(0)
+                        db_file.truncate()
+                        json.dump(recipes, db_file, indent=4)
+                except:
+                    recipes = {}
             elif DB_DRIVER == "SQLITE":
                 conn = get_sqlite_db()
                 if request.form["del-title"] != "":
