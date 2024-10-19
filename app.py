@@ -225,7 +225,8 @@ def main():
                 if not os.path.exists('static'): os.makedirs('static')
                 request.files['image'].save(os.path.join('static', id))
             if DB_DRIVER == "JSON":
-                with open(DATAFILE, 'x') as db_file:
+                mode = 'a' if os.path.exists(DATAFILE) else 'w'
+                with open(DATAFILE, mode) as db_file:
                     try:
                         recipes = json.load(db_file)
                     except Exception:
