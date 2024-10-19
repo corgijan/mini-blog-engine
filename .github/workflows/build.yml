@@ -29,9 +29,9 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ${{ github.event.inputs.image_name }}:latest .
-          docker tag ${{ github.event.inputs.image_name }}:latest ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.image_name }}:latest
+          docker build -t $INPUT_IMAGE_NAME:latest .
+          docker tag $INPUT_IMAGE_NAME:latest ${{ secrets.DOCKER_HUB_USERNAME }}/$INPUT_IMAGE_NAME:latest
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.image_name }}:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$INPUT_IMAGE_NAME:latest
