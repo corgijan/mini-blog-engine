@@ -225,25 +225,22 @@ def main():
                 if not os.path.exists('static'): os.makedirs('static')
                 request.files['image'].save(os.path.join('static', id))
             if DB_DRIVER == "JSON":
-                try:
-                    with open(DATAFILE, 'r+') as db_file:
-                        try:
-                            recipes = json.load(db_file)
-                        except Exception:
-                            recipes = {}
-                        if request.form["del-title"] != "":
-                            if id in recipes: del recipes[id]
-                            if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
-                        else:
-                            recipes[id] = dict(title=request.form["title"][0:3000],
-                                               ingredients=request.form["ingredients"][0:3000],
-                                               prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
-                                               cvss=0.0)
-                        db_file.seek(0)
-                        db_file.truncate()
-                        json.dump(recipes, db_file, indent=4)
-                except:
-                    recipes = {}
+                with open(DATAFILE, 'x') as db_file:
+                    try:
+                        recipes = json.load(db_file)
+                    except Exception:
+                        recipes = {}
+                    if request.form["del-title"] != "":
+                        if id in recipes: del recipes[id]
+                        if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                    else:
+                        recipes[id] = dict(title=request.form["title"][0:3000],
+                                           ingredients=request.form["ingredients"][0:3000],
+                                           prep=request.form["prep"][0:3000], tags=request.form["tags"][0:3000],
+                                           cvss=0.0)
+                    db_file.seek(0)
+                    db_file.truncate()
+                    json.dump(recipes, db_file, indent=4)
             elif DB_DRIVER == "SQLITE":
                 conn = get_sqlite_db()
                 if request.form["del-title"] != "":
