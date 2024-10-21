@@ -189,7 +189,7 @@ def page(name):
 
 def get_sqlite_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('data.db')
+        g.db = sqlite3.connect(DATAFILE)
         g.db.row_factory = sqlite3.Row
         g.db.execute(
             "CREATE TABLE IF NOT EXISTS recipes (id text PRIMARY KEY, title text NOT NULL, ingredients text, prep text, tags text, cvss real)")
