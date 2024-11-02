@@ -222,8 +222,8 @@ def main():
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
             if 'image' in request.files and request.files['image'].mimetype in {'image/webp', 'image/jpeg',
                                                                                 'image/png'}:
-                if not os.path.exists('static'): os.makedirs('static')
-                request.files['image'].save(os.path.join('static', id))
+                if not os.path.exists('img'): os.makedirs('img')
+                request.files['image'].save(os.path.join('img', id))
             if DB_DRIVER == "JSON":
                 mode = 'a' if os.path.exists(DATAFILE) else 'w'
                 with open(DATAFILE, mode) as db_file:
@@ -233,7 +233,7 @@ def main():
                         recipes = {}
                     if request.form["del-title"] != "":
                         if id in recipes: del recipes[id]
-                        if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                        if os.path.isfile(os.path.join('img', id)): os.remove(os.path.join('img', id))
                     else:
                         recipes[id] = dict(title=request.form["title"][0:3000],
                                            ingredients=request.form["ingredients"][0:3000],
@@ -246,7 +246,7 @@ def main():
                 conn = get_sqlite_db()
                 if request.form["del-title"] != "":
                     conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
-                    if os.path.isfile(os.path.join('static', id)): os.remove(os.path.join('static', id))
+                    if os.path.isfile(os.path.join('img', id)): os.remove(os.path.join('img', id))
                 else:
                     conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (
                     id, request.form["title"][0:3000], request.form["ingredients"][0:3000],
