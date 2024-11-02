@@ -276,8 +276,8 @@ def rezepte_edit(id):
         recipe = dict(title="", tags="", prep="", ingredients="", id="")
     template = jinja2.Environment().from_string(page(edit_page))
     return make_response(template.render(r=recipe, authenticated=('authenticated' in session),
-                                         img_url=url_for('static', filename=recipe['id']),
-                                         has_image=os.path.isfile(os.path.join('static', recipe['id']))))
+                                         img_url=url_for('img', filename=recipe['id']),
+                                         has_image=os.path.isfile(os.path.join('img', recipe['id']))))
 
 
 @app.route("/r/<id>")
@@ -285,8 +285,8 @@ def rezepte_show(id):
     recipe = get_rezept(id)
     if recipe is None: return page("Rezept nicht gefunden :(")
     template = jinja2.Environment().from_string(page(recipe_page))
-    return template.render(r=recipe, img_url=url_for('static', filename=recipe['id']),
-                           has_image=os.path.isfile(os.path.join('static', recipe['id'])))
+    return template.render(r=recipe, img_url=url_for('img', filename=recipe['id']),
+                           has_image=os.path.isfile(os.path.join('img', recipe['id'])))
 
 
 def get_rezept(id):
