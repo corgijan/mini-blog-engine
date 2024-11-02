@@ -16,7 +16,7 @@ header = """
                 <head>
                 <title>Corgijans Rezepte</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link rel="stylesheet" href="/static/style.css">
+                <link rel="stylesheet" href="/static/img/style.css">
                 </head>
                 <body>
                 <style>
@@ -222,8 +222,8 @@ def main():
             id = request.form["id"] if request.form.get("id", "") != "" else uuid.uuid4().__str__()
             if 'image' in request.files and request.files['image'].mimetype in {'image/webp', 'image/jpeg',
                                                                                 'image/png'}:
-                if not os.path.exists('img'): os.makedirs('img')
-                request.files['image'].save(os.path.join('img', id))
+                if not os.path.exists('static/img'): os.makedirs('static/img')
+                request.files['image'].save(os.path.join('static/img', id))
             if DB_DRIVER == "JSON":
                 mode = 'a' if os.path.exists(DATAFILE) else 'w'
                 with open(DATAFILE, mode) as db_file:
@@ -233,7 +233,7 @@ def main():
                         recipes = {}
                     if request.form["del-title"] != "":
                         if id in recipes: del recipes[id]
-                        if os.path.isfile(os.path.join('img', id)): os.remove(os.path.join('img', id))
+                        if os.path.isfile(os.path.join('static/img', id)): os.remove(os.path.join('static/img', id))
                     else:
                         recipes[id] = dict(title=request.form["title"][0:3000],
                                            ingredients=request.form["ingredients"][0:3000],
@@ -246,7 +246,7 @@ def main():
                 conn = get_sqlite_db()
                 if request.form["del-title"] != "":
                     conn.cursor().execute("DELETE FROM recipes WHERE id = ?", (id,))
-                    if os.path.isfile(os.path.join('img', id)): os.remove(os.path.join('img', id))
+                    if os.path.isfile(os.path.join('static/img', id)): os.remove(os.path.join('static/img', id))
                 else:
                     conn.cursor().execute("INSERT OR REPLACE INTO recipes VALUES (?, ?, ?, ?, ?, ?)", (
                     id, request.form["title"][0:3000], request.form["ingredients"][0:3000],
@@ -276,8 +276,8 @@ def rezepte_edit(id):
         recipe = dict(title="", tags="", prep="", ingredients="", id="")
     template = jinja2.Environment().from_string(page(edit_page))
     return make_response(template.render(r=recipe, authenticated=('authenticated' in session),
-                                         img_url=url_for('img', filename=recipe['id']),
-                                         has_image=os.path.isfile(os.path.join('img', recipe['id']))))
+                                         img_url=url_for('static/img', filename=recipe['id']),
+                                         has_image=os.path.isfile(os.path.join('static/img', recipe['id']))))
 
 
 @app.route("/r/<id>")
@@ -285,8 +285,8 @@ def rezepte_show(id):
     recipe = get_rezept(id)
     if recipe is None: return page("Rezept nicht gefunden :(")
     template = jinja2.Environment().from_string(page(recipe_page))
-    return template.render(r=recipe, img_url=url_for('img', filename=recipe['id']),
-                           has_image=os.path.isfile(os.path.join('img', recipe['id'])))
+    return template.render(r=recipe, img_url=url_for('static/img', filename=recipe['id']),
+                           has_image=os.path.isfile(os.path.join('static/img', recipe['id'])))
 
 
 def get_rezept(id):
