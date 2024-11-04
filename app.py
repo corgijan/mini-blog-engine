@@ -38,6 +38,7 @@ header = """
                     width: 500px;
                     border-radius: 15px;
                 }
+                #recipesList{max-height: 60vh;overflow-y: scroll}
                 .pre{ white-space: pre-wrap; }
                 .norm{ background: #264653; border: 0px; text-decoration: underline; }
                 .nav-link{ font-size:1rem; }
@@ -100,7 +101,7 @@ header = """
           <li class="nav-item">
             <a class="nav-link" href="http://blog.corgijan.dev">blog</a>
           </li>
-          </ul>
+</ul>
   </div>
     <div class="avatar-container">
       <div class="avatar-img-border">
