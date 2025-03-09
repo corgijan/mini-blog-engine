@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Corgijans Rezepte</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="/static/script.js"></script>
     <link rel="stylesheet" href="/static/style.css">
     <style>
         * { font-size: 20px; color: #E9C46A; font-family: "Helvetica", sans-serif; }
@@ -34,41 +34,38 @@
 </head>
 
 <main style="padding-top:100px">
-<nav style="font-size: 1rem" class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a class="navbar-brand" href="/">🦊 corgijans Rezepte</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-</button>
+    <nav style="font-size: 1rem" class="navbar navbar-expand-xl fixed-top navbar-custom top-nav-regular navbar-dark"><a
+            class="navbar-brand" href="/">🦊 corgijans Rezepte</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar"
+                aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <div class="collapse navbar-collapse" id="main-navbar">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/">home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/e/new">hinzufügen</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="http://blog.corgijan.dev">blog</a>
-            </li>
-        </ul>
-    </div>
-    <div class="avatar-container">
-        <div class="avatar-img-border">
-            <a href="/">
-                <img alt="Navigation bar avatar" class="avatar-img" src="http://blog.corgijan.dev/assets/images/ava.jpg">
-            </a>
+        <div class="collapse navbar-collapse" id="main-navbar">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/e/new">hinzufügen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="http://blog.corgijan.dev">blog</a>
+                </li>
+            </ul>
         </div>
-    </div>
+        <div class="avatar-container">
+            <div class="avatar-img-border">
+                <a href="/">
+                    <img alt="Navigation bar avatar" class="avatar-img"
+                         src="http://blog.corgijan.dev/assets/images/ava.jpg">
+                </a>
+            </div>
+        </div>
 
-</nav>
-
-
-<main class="container mt-5 pt-5">
+    </nav>
     {% block content %}
     {% endblock %}
-</main>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
-<script src="/static/script.js"></script>
 </main>
 </html>

@@ -9,6 +9,7 @@
             li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
         }
     }
+
     function sortRecipes() {
         let list = document.getElementById('recipesList')
         Array.from(list.getElementsByTagName('li'))
@@ -16,11 +17,15 @@
             .forEach(item => list.appendChild(item));
     }
 </script>
-<p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code und <br> dem look eines Blogs von 1999</p>
+<p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code und <br> dem look eines
+    Blogs von 1999</p>
 REZEPTE: <br>
 <input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
 {% if recipes_count >= 50 %}
-<select id="sortSelector" onchange="sortRecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+<select id="sortSelector" onchange="sortRecipes()">
+    <option value="asc">aufsteigend</option>
+    <option value="desc">absteigend</option>
+</select>
 {% endif %}
 <ul id="recipesList">
     {% for r in recipes%}
