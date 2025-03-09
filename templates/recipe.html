@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{r.title|e}}</h1>
+{% if has_image %}<img src="{{ img_url }}"><br>{% endif %}
+<h3>Tags: {{r.tags|e}}</h3>
+<h3 style="text-decoration: underline;"> Zutaten: </h3>
+<h4><p class="pre">{{r.ingredients|e}}</p></h4>
+<h3 style="text-decoration: underline;"> Zubereitung: </h3>
+<h4><p class="pre">{{r.prep|e}}</p></h4>
+<a href="/e/{{r.id}}">Editieren</a>
+{% endblock %}

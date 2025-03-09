@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<script>
+    function filterRecipes() {
+        let filter = document.getElementById('recipesFilter').value.toUpperCase();
+        for (let li of document.getElementById('recipesList').getElementsByTagName('li')) {
+            let a = li.getElementsByTagName('a')[0];
+            let txtValue = a.textContent || a.innerText;
+            li.style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none"
+        }
+    }
+    function sortRecipes() {
+        let list = document.getElementById('recipesList')
+        Array.from(list.getElementsByTagName('li'))
+            .sort((a, b) => (sortSelector.value === 'asc' ? 1 : -1) * (a.innerText).localeCompare(b.innerText))
+            .forEach(item => list.appendChild(item));
+    }
+</script>
+<p>Wilkommen bei Corgijans Rezepten<br> Dies ist ein "Code-Golf" Projekt mit ~250 Zeilen Code und <br> dem look eines Blogs von 1999</p>
+REZEPTE: <br>
+<input type="text" id="recipesFilter" onkeyup="filterRecipes()" placeholder="Suche nach Rezepten,Tags..">
+{% if recipes_count >= 50 %}
+<select id="sortSelector" onchange="sortRecipes()"><option value="asc">aufsteigend</option><option value="desc">absteigend</option></select>
+{% endif %}
+<ul id="recipesList">
+    {% for r in recipes%}
+    <li><h2><a href="/r/{{r.id|e}}">{{ r.title|e}}<span style="display:none">{{r.tags|e}}</span></a></h2></li>
+    {% endfor %}
+</ul>
+{% endblock %}
