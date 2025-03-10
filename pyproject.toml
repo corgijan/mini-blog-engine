@@ -1,14 +1,12 @@
-[tool.poetry]
-name = "bäckerone"
+[project]
+authors = [
+    {name = "Iamjava", email = "jan.vaorin@tu-dortmund.de"},
+]
+requires-python = "<4.0,>=3.8"
+dependencies = [
+    "flask<3.0.0,>=2.3.2",
+]
+name = "baeckerone"
 version = "0.1.0"
 description = ""
-authors = ["Iamjava <jan.vaorin@tu-dortmund.de>"]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.8"
-flask = "^2.3.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
