@@ -8,6 +8,7 @@ RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
 COPY pyproject.toml .
 COPY uv.lock .
 RUN uv sync
+COPY . .
 
 
 # Run app.py when the container launches
