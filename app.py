@@ -122,6 +122,6 @@ def get_rezept(id):
     return dict(recipe_row) if recipe_row is not None else None
 
 
-@app.route('/favicon.png')
+@app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.png', mimetype='image/x-icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/x-icon')
