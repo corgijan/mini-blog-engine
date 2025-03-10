@@ -2,7 +2,7 @@
 authors = [
     {name = "Iamjava", email = "jan.vaorin@tu-dortmund.de"},
 ]
-requires-python = "<4.0,>=3.8"
+requires-python = "<4.0,>=3.0"
 dependencies = [
     "flask<3.0.0,>=2.3.2",
 ]
