@@ -2,6 +2,8 @@ FROM ghcr.io/astral-sh/uv:alpine
 
 WORKDIR /app
 
+RUN apk add python
+
 COPY pyproject.toml .
 COPY uv.lock .
 RUN uv sync
