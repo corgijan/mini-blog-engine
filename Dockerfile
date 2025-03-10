@@ -11,4 +11,4 @@ RUN uv sync
 
 
 # Run app.py when the container launches
-CMD ["poetry", "run", "flask", "run", "--host=0.0.0.0"]
+CMD ["uv", "run", "flask", "run", "--host=0.0.0.0"]
